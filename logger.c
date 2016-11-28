@@ -13,13 +13,14 @@ void log(u8* message, ...) {
 	va_list vl;
 	va_start(vl, message);
 
-	if (lastPosition > 10) {
+	if (lastPosition > MAX_OUTPUT_SIZE) {
 		lastPosition = 0;
 	}
 
 	vsnprintf(buffer, sizeof(buffer), message, vl);
 	va_end(vl);
 
+	LCD_ShowString(30, lastPosition * 20, "                    ", WHITE, BLACK);
 	LCD_ShowString(30, lastPosition * 20, buffer, WHITE, BLACK);
 	lastPosition++;
 }
