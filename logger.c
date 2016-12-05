@@ -1,4 +1,5 @@
 #include "logger.h"
+#include "timer.h"
 
 int lastPosition = 0;
 
@@ -20,7 +21,9 @@ void log(u8* message, ...) {
 	vsnprintf(buffer, sizeof(buffer), message, vl);
 	va_end(vl);
 
-	LCD_ShowString(30, lastPosition * 20, "                    ", WHITE, BLACK);
+	LCD_ShowString(30, lastPosition * 20, "                    ", WHITE,
+	BLACK);
+	LCD_ShowNum(0, lastPosition * 20, GetCurrentTimeMillis(), 30, WHITE, BLACK);
 	LCD_ShowString(30, lastPosition * 20, buffer, WHITE, BLACK);
 	lastPosition++;
 }
