@@ -218,6 +218,7 @@ void RTC_Configuration(void) {
 	RTC_SetPrescaler(32); // period : 1ms
 	RTC_WaitForLastTask();
 }
+
 void delay(int i) {
 	while (i--) {
 		;
