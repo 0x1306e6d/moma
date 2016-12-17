@@ -17,6 +17,13 @@ void Timer_Configuration() {
 	RTC_WaitForLastTask();
 }
 
+void DelayMilliSeconds(uint32_t time) {
+	uint32_t current = GetCurrentTimeMillis();
+	while (GetCurrentTimeMillis() < (current + time)) {
+		;
+	}
+}
+
 uint32_t GetCurrentTimeMillis() {
 	return RTC_GetCounter();
 }

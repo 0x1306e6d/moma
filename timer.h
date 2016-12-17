@@ -6,6 +6,7 @@
 #include "stm32f10x_rtc.h"
 
 void Timer_Configuration(void);
+void DelayMilliSeconds(uint32_t time);
 uint32_t GetCurrentTimeMillis(void);
 
 #endif

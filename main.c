@@ -19,122 +19,37 @@
 #define false 0
 #define boolean uint8_t
 
-void RTC_Configuration(void);
 void GPIO_Configuration(void);
-void configureFlexSensor(void);
+void FlexSensor_Configurationr(void);
 
-uint32_t Read_Distance(void);
-void delay(int i);
-
-__IO uint32_t FlexSensorBuffer;
-uint32_t defaultValue;
+__IO uint32_t FlexSensorBuffer = 0;
+uint32_t FlexDefaultValue;
 
 int main() {
-	int i = 1000000;
 	boolean clicking = false;
-	uint32_t TimeVar;
-	uint32_t TMM = 0, TSS = 0, TMSS = 0;
-	boolean waiting = false;
-	boolean listening = false;
-	uint32_t listenTime = 0, delayTime = 0;
 
 	SystemInit();
+
 	initalizeLogger();
-
-	configureFlexSensor();
-
 	Timer_Configuration();
 	log("Timer configuration");
+
+	FlexSensor_Configurationr();
+	log("FlexSensor configuration");
 
 	GPIO_Configuration();
 	log("GPIO configure");
 
-	while (i--) {
-		;
-	}
-	defaultValue = FlexSensorBuffer;
-
 	while (true) {
-		if (clicking && FlexSensorBuffer <= (defaultValue * 1.02)) {
+		if (clicking && FlexSensorBuffer <= (FlexDefaultValue * 1.02)) {
 			log("light on");
 			clicking = false;
 		}
-		if (clicking == false && FlexSensorBuffer >= (defaultValue * 1.1)) {
+		if (clicking == false && FlexSensorBuffer >= (FlexDefaultValue * 1.1)) {
 			clicking = true;
 		}
-
-		GPIO_SetBits(GPIOC, GPIO_Pin_9);
-		GPIO_ResetBits(GPIOC, GPIO_Pin_7);
-		delay(100);
-		GPIO_ResetBits(GPIOC, GPIO_Pin_9);
-		log("start waiting");
-
-		i = 1000000;
-		while (i--) {
-			if (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7) == SET) {
-				log("SET");
-			}
-		}
-
-//		i = Read_Distance();
-//		log("ReadDistance: %d", i);
-//		if (!waiting) {
-//			GPIO_SetBits(GPIOC, GPIO_Pin_9);
-//			GPIO_ResetBits(GPIOC, GPIO_Pin_7);
-//			delay(100);
-//			GPIO_ResetBits(GPIOC, GPIO_Pin_9);
-//			waiting = true;
-//			log("start waiting");
-//		}
-//		if (waiting) {
-//			while (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7) == SET) {
-//				if (listenTime == 0) {
-//					listenTime = RTC_GetCounter();
-//					log("listenTime: %d", listenTime);
-//				}
-//			}
-//			delayTime = RTC_GetCounter() - listenTime;
-//			log("delayTime: %d", delayTime);
-//			waiting = false;
-//			listenTime = 0;
-//			delayTime = 0;
-//			delay(1000000);
-//			log("start next sensor");
-//		}
-//		log("DataBit: %d", GPIO_ReadInputDataBit(GPIOE, GPIO_PinSource1));
-//		if (waiting && !listening
-//				&& GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7) == SET) {
-//			listenTime = RTC_GetCounter();
-//			listening = true;
-//			log("start listening.");
-//			log("listenTime: %d", listenTime);
-//		}
-//		if (listening && GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7) == RESET) {
-//			delayTime = RTC_GetCounter() - listenTime;
-//			log("delayTime: %d", delayTime);
-//			listening = false;
-//			waiting = false;
-//			delay(1000000);
-//			log("start next sensor");
-//		}
 	}
-
 	return 0;
-}
-
-uint32_t Read_Distance(void) {
-	__IO uint32_t disTime = 10;
-	__IO uint8_t flag = 0;
-	GPIO_SetBits(GPIOC, GPIO_Pin_9);
-	GPIO_ResetBits(GPIOC, GPIO_Pin_7);
-	delay(10);
-	GPIO_ResetBits(GPIOC, GPIO_Pin_9);
-
-	while (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7) == SET) {
-		disTime++;
-	}
-
-	return disTime;
 }
 
 void GPIO_Configuration(void) {
@@ -143,7 +58,7 @@ void GPIO_Configuration(void) {
 
 	// Echo : PC7
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 	// Trigger : PC9
@@ -153,7 +68,7 @@ void GPIO_Configuration(void) {
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
-void configureFlexSensor() {
+void FlexSensor_Configurationr() {
 	ADC_InitTypeDef ADC_InitStructure;
 	DMA_InitTypeDef DMA_InitStructure;
 
@@ -200,26 +115,10 @@ void configureFlexSensor() {
 	}
 
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-}
 
-void RTC_Configuration(void) {
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-	PWR_BackupAccessCmd(ENABLE);
-	BKP_DeInit();
-	RCC_LSEConfig(RCC_LSE_ON);
-	while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) {
-	}
-	RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
-	RCC_RTCCLKCmd(ENABLE);
-	RTC_WaitForSynchro();
-	RTC_WaitForLastTask();
-	RTC_ITConfig(RTC_IT_SEC, ENABLE);
-	RTC_WaitForLastTask();
-	RTC_SetPrescaler(32); // period : 1ms
-	RTC_WaitForLastTask();
-}
-void delay(int i) {
-	while (i--) {
+	while (FlexSensorBuffer == 0) {
 		;
 	}
+	FlexDefaultValue = FlexSensorBuffer;
+	log("FlexDefaultValue : %d", FlexDefaultValue);
 }
