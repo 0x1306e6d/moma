@@ -1,6 +1,7 @@
 #include "timer.h"
 
 void Timer_Configuration() {
+	Log("Start Timer Configuration");
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
 	PWR_BackupAccessCmd(ENABLE);
 	BKP_DeInit();
@@ -15,6 +16,7 @@ void Timer_Configuration() {
 	RTC_WaitForLastTask();
 	RTC_SetPrescaler(32); // period : 1ms
 	RTC_WaitForLastTask();
+	Log("End Timer Configuration");
 }
 
 void DelayMilliSeconds(uint32_t time) {

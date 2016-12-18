@@ -1,9 +1,8 @@
 #ifndef _TIMER_H
 #define _TIMER_H
 
-#include "stm32f10x.h"
-#include "stm32f10x_rcc.h"
-#include "stm32f10x_rtc.h"
+#include "common.h"
+#include "logger.h"
 
 void Timer_Configuration(void);
 void DelayMilliSeconds(uint32_t time);

@@ -3,12 +3,13 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "stm32f10x.h"
+#include "common.h"
 #include "lcd.h"
 
-#define MAX_OUTPUT_SIZE 15
+#define MAX_OUTPUT_SIZE 10
 
-void initalizeLogger();
-void log(u8* message, ...);
+void Logger_Configuration(void);
+void Log(u8* message, ...);
+void LogAt(u16 y, u8* message, ...);
 
 #endif
