@@ -8,6 +8,7 @@ void HC_SR04_Configuration(void) {
 	Log("Start HC_SR04 Configuration");
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	Log("HC_SR04 RCC Configure");
 
@@ -25,6 +26,21 @@ void HC_SR04_Configuration(void) {
 	Log("HC_SR04 TRIGGER Configure");
 
 	Log("End HC_SR04 Configuration");
+
+	// Echo : PD12
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
+	Log("HC_SR04 TOP ECHO Configure");
+
+	// Trigger : PD13
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
+	Log("HC_SR04 TOP TRIGGER Configure");
+
+	Log("End HC_SR04 TOP Configuration");
 }
 
 void Request_HC_SR04(void) {
@@ -32,4 +48,11 @@ void Request_HC_SR04(void) {
 	GPIO_SetBits(GPIOC, HC_SR04_TRIGGER);
 	DelayMilliSeconds(10);
 	GPIO_ResetBits(GPIOC, HC_SR04_TRIGGER);
+}
+
+void Request_HC_SR04_Top(void) {
+	LogAt(10, "Request HC_SR04 TOP at %d", GetCurrentTimeMillis());
+	GPIO_SetBits(GPIOD, HC_SR04_TRIGGER_TOP);
+	DelayMilliSeconds(10);
+	GPIO_ResetBits(GPIOD, HC_SR04_TRIGGER_TOP);
 }
