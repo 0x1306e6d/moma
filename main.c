@@ -20,51 +20,13 @@ int main()
 
 	SystemInit();
 	Logger_Configuration();
-
 	Timer_Configuration();
-	FlexSensor_Configuration();
-	HC_SR04_Configuration();
 	Button_Configuration();
 
-	LogAt(1, "Are you stretch your second finger?");
-	while (!IsButton1Clicking())
-	{
-		LogAt(2, "flex value : %d", GetLeftFlexSensorValue());
-		DelayMilliSeconds(100);
-	}
-	SetLeftDefaultFlexSensorValue();
-	LogAt(2, "FlexLeftDefault : %d", GetLeftDefaultFlexSensorValue());
-	DelayMilliSeconds(1000);
+	HC_SR04_Configuration();
 
-	LogAt(3, "Are you fold your second finger?");
-	while (!IsButton1Clicking())
-	{
-		LogAt(4, "flex value : %d", GetLeftFlexSensorValue());
-		DelayMilliSeconds(100);
-	}
-	SetLeftClickThreshold();
-	LogAt(4, "FlexLeftThreshold : %d", GetLeftClickThreshold());
-	DelayMilliSeconds(1000);
-
-	LogAt(1, "Are you stretch your third finger");
-	while (!IsButton1Clicking())
-	{
-		LogAt(2, "flex value : %d", GetRightFlexSensorValue());
-		DelayMilliSeconds(100);
-	}
-	SetRightDefaultFlexSensorValue();
-	LogAt(2, "FlexRightDefault : %d", GetRightDefaultFlexSensorValue());
-	DelayMilliSeconds(1000);
-
-	LogAt(3, "Are you fold your third finger?");
-	while (!IsButton1Clicking())
-	{
-		LogAt(4, "flex value : %d", GetRightFlexSensorValue());
-		DelayMilliSeconds(100);
-	}
-	SetRightClickThreshold();
-	LogAt(4, "FlexRightThreshold : %d", GetRightClickThreshold());
-	DelayMilliSeconds(1000);
+	FlexSensor_Configuration();
+	Start_FlexSensor_Initializer();
 
 	while (true)
 	{
