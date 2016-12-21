@@ -107,7 +107,7 @@ void Start_FlexSensor_Initializer(void)
 	LogAt(1, "Are you stretch your third finger");
 	while (!IsButton1Clicking())
 	{
-		value = GetLeftFlexSensorValue();
+		value = GetRightFlexSensorValue();
 		LogAt(2, "flex value : %d", value);
 		DelayMilliSeconds(100);
 	}
@@ -120,7 +120,7 @@ void Start_FlexSensor_Initializer(void)
 	LogAt(3, "Are you fold your third finger?");
 	while (!IsButton1Clicking())
 	{
-		value = GetLeftFlexSensorValue();
+		value = GetRightFlexSensorValue();
 		LogAt(4, "flex value : %d", value);
 		DelayMilliSeconds(100);
 	}
@@ -151,7 +151,7 @@ boolean IsLeftClickEnd(void)
 {
 	return GetLeftFlexSensorValue() != 0
 			&& GetLeftFlexSensorValue()
-					>= (GetLeftDefaultFlexSensorValue() * 1.1);
+					>= (GetLeftDefaultFlexSensorValue() * 0.9);
 }
 
 boolean IsRightClickStart(void)
@@ -164,8 +164,9 @@ boolean IsRightClickEnd(void)
 {
 	return GetRightFlexSensorValue() != 0
 			&& GetRightFlexSensorValue()
-					>= (GetRightDefaultFlexSensorValue() * 1.1);
+					>= (GetRightDefaultFlexSensorValue() * 0.9);
 }
+
 uint32_t GetLeftClickThreshold(void)
 {
 	return FlexClickThreshold[0];
