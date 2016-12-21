@@ -3,8 +3,6 @@
 void HC_SR04_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
-	EXTI_InitTypeDef EXTI_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
 
 	// RCC Configuration
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);

@@ -18,6 +18,7 @@ int main()
 {
 	uint32_t distance_lr = 0;
 	uint32_t distance_tb = 0;
+	uint32_t infinite_prevention = 0;
 	boolean clicking_left = false;
 	boolean clicking_right = false;
 
@@ -62,12 +63,25 @@ int main()
 		Request_HC_SR04_LR();
 		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
 		{
-			;
+			infinite_prevention++;
+			if (infinite_prevention > MAX_INFINITE_THRESHOLD)
+			{
+				Log("Prevent infinite loop");
+				break;
+			}
 		}
+		infinite_prevention = 0;
 		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
 		{
 			distance_lr++;
+			infinite_prevention++;
+			if (infinite_prevention > MAX_INFINITE_THRESHOLD)
+			{
+				Log("Prevent infinite loop");
+				break;
+			}
 		}
+		infinite_prevention = 0;
 		if (distance_lr > 0)
 		{
 			m_distance_lr = distance_lr;
@@ -78,12 +92,25 @@ int main()
 		Request_HC_SR04_TB();
 		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
 		{
-			;
+			infinite_prevention++;
+			if (infinite_prevention > MAX_INFINITE_THRESHOLD)
+			{
+				Log("Prevent infinite loop");
+				break;
+			}
 		}
+		infinite_prevention = 0;
 		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
 		{
 			distance_tb++;
+			infinite_prevention++;
+			if (infinite_prevention > MAX_INFINITE_THRESHOLD)
+			{
+				Log("Prevent infinite loop");
+				break;
+			}
 		}
+		infinite_prevention = 0;
 		if (distance_tb > 0)
 		{
 			m_distance_tb = distance_tb;
