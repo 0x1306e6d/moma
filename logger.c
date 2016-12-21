@@ -2,12 +2,14 @@
 
 int lastPosition = 0;
 
-void Logger_Configuration(void) {
+void Logger_Configuration(void)
+{
 	LCD_Init();
 	LCD_Clear(BLACK);
 }
 
-void Log(u8* message, ...) {
+void Log(u8* message, ...)
+{
 	u8 buffer[100];
 	va_list vl;
 
@@ -19,14 +21,18 @@ void Log(u8* message, ...) {
 	WHITE, BLACK);
 	LCD_ShowString(0, lastPosition * 20, buffer, WHITE, BLACK);
 
-	if (lastPosition > MAX_OUTPUT_SIZE) {
+	if (lastPosition > MAX_OUTPUT_SIZE)
+	{
 		lastPosition = 0;
-	} else {
+	}
+	else
+	{
 		lastPosition++;
 	}
 }
 
-void LogAt(u16 y, u8* message, ...) {
+void LogAt(u16 y, u8* message, ...)
+{
 	u8 buffer[100];
 	va_list vl;
 

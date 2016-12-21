@@ -6,7 +6,7 @@
 #include "common.h"
 #include "lcd.h"
 
-#define MAX_OUTPUT_SIZE 10
+#define MAX_OUTPUT_SIZE 5
 
 void Logger_Configuration(void);
 void Log(u8* message, ...);

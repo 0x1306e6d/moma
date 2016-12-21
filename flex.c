@@ -3,17 +3,21 @@
 __IO uint32_t FlexSensorBuffer[2];
 __IO uint32_t FlexDefaultValue[2];
 
-void FlexSensor_Configuration(void) {
+void FlexSensor_Configuration(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
 	ADC_InitTypeDef ADC_InitStructure;
 	DMA_InitTypeDef DMA_InitStructure;
-
-	Log("Start FlexSensor Configuration");
 
 	// RCC Configuration
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-	Log("FlexSensor RCC Configure");
+
+	// GPIO Configuration
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	// DMA Configuration
 	DMA_DeInit(DMA1_Channel1);
@@ -30,7 +34,6 @@ void FlexSensor_Configuration(void) {
 	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
 	DMA_Init(DMA1_Channel1, &DMA_InitStructure);
 	DMA_Cmd(DMA1_Channel1, ENABLE);
-	Log("FlexSensor DMA Configure");
 
 	// ADC Configuration
 	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
@@ -45,48 +48,53 @@ void FlexSensor_Configuration(void) {
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 2, ADC_SampleTime_55Cycles5);
 	ADC_DMACmd(ADC1, ENABLE);
 	ADC_Cmd(ADC1, ENABLE);
-	Log("FlexSensor ADC Configure");
 
 	ADC_ResetCalibration(ADC1);
-	while (ADC_GetResetCalibrationStatus(ADC1)) {
+	while (ADC_GetResetCalibrationStatus(ADC1))
+	{
 		;
 	}
 	ADC_StartCalibration(ADC1);
-	while (ADC_GetCalibrationStatus(ADC1)) {
+	while (ADC_GetCalibrationStatus(ADC1))
+	{
 		;
 	}
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 
 	// Calibration
 	FlexSensorBuffer[0] = 0;
-	while (FlexSensorBuffer[0] == 0) {
+	while (FlexSensorBuffer[0] == 0)
+	{
 		;
 	}
 	FlexDefaultValue[0] = FlexSensorBuffer[0];
-	Log("FlexLeft : %d", FlexDefaultValue[0]);
+	Log("FlexLeftDefault : %d", FlexDefaultValue[0]);
 
 	FlexSensorBuffer[1] = 0;
-	while (FlexSensorBuffer[1] == 0) {
+	while (FlexSensorBuffer[1] == 0)
+	{
 		;
 	}
 	FlexDefaultValue[1] = FlexSensorBuffer[1];
-	Log("FlexRight : %d", FlexDefaultValue[1]);
-
-	Log("Finish FlexSensor Configuration");
+	Log("FlexRightDefault : %d", FlexDefaultValue[1]);
 }
 
-uint32_t GetLeftFlexSensorValue(void) {
+uint32_t GetLeftFlexSensorValue(void)
+{
 	return FlexSensorBuffer[0];
 }
 
-uint32_t GetLeftDefaultFlexSensorValue(void) {
+uint32_t GetLeftDefaultFlexSensorValue(void)
+{
 	return FlexDefaultValue[0];
 }
 
-uint32_t GetRightFlexSensorValue(void) {
+uint32_t GetRightFlexSensorValue(void)
+{
 	return FlexSensorBuffer[1];
 }
 
-uint32_t GetRightDefaultFlexSensorValue(void) {
+uint32_t GetRightDefaultFlexSensorValue(void)
+{
 	return FlexDefaultValue[1];
 }
