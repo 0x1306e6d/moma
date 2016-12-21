@@ -8,13 +8,16 @@
 // flash load "C:\Users\USER\Desktop\monday\motionMouse\Debug\motionMouse.axf"
 // flash load "C:\Users\USER\Desktop\monday\motionMouse\flashclear.axf"
 
-uint32_t m_distance = 0;
-uint32_t m_distance_top = 0;
+void doLeftClick(void);
+void doRightClick(void);
+
+uint32_t m_distance_lr = 0;
+uint32_t m_distance_tb = 0;
 
 int main()
 {
-	uint32_t distance = 0;
-	uint32_t distance_top = 0;
+	uint32_t distance_lr = 0;
+	uint32_t distance_tb = 0;
 	boolean clicking_left = false;
 	boolean clicking_right = false;
 
@@ -30,15 +33,13 @@ int main()
 
 	while (true)
 	{
-		distance = 0;
-		distance_top = 0;
+		distance_lr = 0;
+		distance_tb = 0;
 
-		LogAt(8, "LeftFlex : %d", GetLeftFlexSensorValue());
-		LogAt(9, "RightFlex : %d", GetRightFlexSensorValue());
-
+		// Left Click
 		if (clicking_left && IsLeftClickEnd())
 		{
-			Log("Left Click! value:%d", GetLeftFlexSensorValue());
+			doLeftClick();
 			clicking_left = false;
 		}
 		if (!clicking_left && IsLeftClickStart())
@@ -46,9 +47,10 @@ int main()
 			clicking_left = true;
 		}
 
+		// Right Click
 		if (clicking_right && IsRightClickEnd())
 		{
-			Log("Right Click! value:%d", GetRightFlexSensorValue());
+			doRightClick();
 			clicking_right = false;
 		}
 		if (!clicking_right && IsRightClickStart())
@@ -56,21 +58,7 @@ int main()
 			clicking_right = true;
 		}
 
-		Request_HC_SR04_TB();
-		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
-		{
-			;
-		}
-		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
-		{
-			distance_top++;
-		}
-		if (distance_top > 0)
-		{
-			m_distance_top = distance_top;
-		}
-		LogAt(11, "HC_SR04_TOP : %d", m_distance_top);
-
+		// Left-Right HC_SR04
 		Request_HC_SR04_LR();
 		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
 		{
@@ -78,14 +66,40 @@ int main()
 		}
 		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
 		{
-			distance++;
+			distance_lr++;
 		}
-		if (distance > 0)
+		if (distance_lr > 0)
 		{
-			m_distance = distance;
+			m_distance_lr = distance_lr;
 		}
-		LogAt(14, "HC_SR04 : %d", m_distance);
+		LogAt(11, "HC_SR04 LR : %d", m_distance_lr);
+
+		// Top-Bottom HC_SR04
+		Request_HC_SR04_TB();
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
+		{
+			distance_tb++;
+		}
+		if (distance_tb > 0)
+		{
+			m_distance_tb = distance_tb;
+		}
+		LogAt(13, "HC_SR04 TB : %d", m_distance_tb);
 
 		DelayMilliSeconds(33);
 	}
+}
+
+void doLeftClick(void)
+{
+	Log("Left click at %d", GetCurrentTimeMillis());
+}
+
+void doRightClick(void)
+{
+	Log("Right click at %d", GetCurrentTimeMillis());
 }

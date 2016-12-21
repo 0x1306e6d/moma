@@ -37,7 +37,8 @@ void HC_SR04_Configuration(void)
 
 void Request_HC_SR04_LR(void)
 {
-	LogAt(10, "Request HC_SR04 LR at %d", GetCurrentTimeMillis());
+	LogAt(10, "Req HC_SR04 LR at %d", GetCurrentTimeMillis());
+
 	GPIO_SetBits(GPIOC, HC_SR04_TRIGGER_LR);
 	DelayMilliSeconds(10);
 	GPIO_ResetBits(GPIOC, HC_SR04_TRIGGER_LR);
@@ -45,7 +46,8 @@ void Request_HC_SR04_LR(void)
 
 void Request_HC_SR04_TB(void)
 {
-	LogAt(12, "Request HC_SR04 TB at %d", GetCurrentTimeMillis());
+	LogAt(12, "Req HC_SR04 TB at %d", GetCurrentTimeMillis());
+
 	GPIO_SetBits(GPIOD, HC_SR04_TRIGGER_TB);
 	DelayMilliSeconds(10);
 	GPIO_ResetBits(GPIOD, HC_SR04_TRIGGER_TB);
