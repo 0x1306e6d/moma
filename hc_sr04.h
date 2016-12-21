@@ -5,13 +5,13 @@
 #include "logger.h"
 #include "timer.h"
 
-#define HC_SR04_ECHO GPIO_Pin_8
-#define HC_SR04_TRIGGER GPIO_Pin_9
-#define HC_SR04_ECHO_TOP GPIO_Pin_12
-#define HC_SR04_TRIGGER_TOP GPIO_Pin_13
+#define HC_SR04_ECHO_LR GPIO_Pin_8
+#define HC_SR04_ECHO_TB GPIO_Pin_12
+#define HC_SR04_TRIGGER_LR GPIO_Pin_9
+#define HC_SR04_TRIGGER_TB GPIO_Pin_13
 
 void HC_SR04_Configuration(void);
-void Request_HC_SR04(void);
-void Request_HC_SR04_Top(void);
+void Request_HC_SR04_LR(void);
+void Request_HC_SR04_TB(void);
 
 #endif

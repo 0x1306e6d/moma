@@ -13,40 +13,40 @@ void HC_SR04_Configuration(void)
 
 	// GPIO Configuration
 	// Echo : PC8
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+	GPIO_InitStructure.GPIO_Pin = HC_SR04_ECHO_LR;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 	// Trigger : PC9
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Pin = HC_SR04_TRIGGER_LR;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 	// Echo : PD12
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Pin = HC_SR04_ECHO_TB;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 
 	// Trigger : PD13
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+	GPIO_InitStructure.GPIO_Pin = HC_SR04_TRIGGER_TB;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
-void Request_HC_SR04(void)
+void Request_HC_SR04_LR(void)
 {
-	LogAt(12, "Request HC_SR04 at %d", GetCurrentTimeMillis());
-	GPIO_SetBits(GPIOC, HC_SR04_TRIGGER);
+	LogAt(10, "Request HC_SR04 LR at %d", GetCurrentTimeMillis());
+	GPIO_SetBits(GPIOC, HC_SR04_TRIGGER_LR);
 	DelayMilliSeconds(10);
-	GPIO_ResetBits(GPIOC, HC_SR04_TRIGGER);
+	GPIO_ResetBits(GPIOC, HC_SR04_TRIGGER_LR);
 }
 
-void Request_HC_SR04_Top(void)
+void Request_HC_SR04_TB(void)
 {
-	LogAt(10, "Request HC_SR04 TOP at %d", GetCurrentTimeMillis());
-	GPIO_SetBits(GPIOD, HC_SR04_TRIGGER_TOP);
+	LogAt(12, "Request HC_SR04 TB at %d", GetCurrentTimeMillis());
+	GPIO_SetBits(GPIOD, HC_SR04_TRIGGER_TB);
 	DelayMilliSeconds(10);
-	GPIO_ResetBits(GPIOD, HC_SR04_TRIGGER_TOP);
+	GPIO_ResetBits(GPIOD, HC_SR04_TRIGGER_TB);
 }

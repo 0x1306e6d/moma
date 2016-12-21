@@ -56,30 +56,36 @@ int main()
 			clicking_right = true;
 		}
 
-//		Request_HC_SR04_Top();
-//		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TOP) == Bit_RESET) {
-//			;
-//		}
-//		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TOP) == Bit_SET) {
-//			distance_top++;
-//		}
-//		if (distance_top > 0) {
-//			m_distance_top = distance_top;
-//		}
-//		LogAt(11, "HC_SR04_TOP : %d", m_distance_top);
-//
-//		Request_HC_SR04();
-//		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO) == Bit_RESET) {
-//			;
-//		}
-//		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO) == Bit_SET) {
-//			distance++;
-//		}
-//		if (distance > 0) {
-//			m_distance = distance;
-//		}
-//		LogAt(14, "HC_SR04 : %d", m_distance);
+		Request_HC_SR04_TB();
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
+		{
+			distance_top++;
+		}
+		if (distance_top > 0)
+		{
+			m_distance_top = distance_top;
+		}
+		LogAt(11, "HC_SR04_TOP : %d", m_distance_top);
 
-		DelayMilliSeconds(333);
+		Request_HC_SR04_LR();
+		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
+		{
+			distance++;
+		}
+		if (distance > 0)
+		{
+			m_distance = distance;
+		}
+		LogAt(14, "HC_SR04 : %d", m_distance);
+
+		DelayMilliSeconds(33);
 	}
 }
