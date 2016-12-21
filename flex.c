@@ -2,6 +2,7 @@
 
 __IO uint32_t FlexSensorBuffer[2];
 __IO uint32_t FlexDefaultValue[2];
+__IO uint32_t FlexClickThreshold[2];
 
 void FlexSensor_Configuration(void)
 {
@@ -15,7 +16,7 @@ void FlexSensor_Configuration(void)
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
 	// GPIO Configuration
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
@@ -44,8 +45,8 @@ void FlexSensor_Configuration(void)
 	ADC_InitStructure.ADC_NbrOfChannel = 2;
 	ADC_Init(ADC1, &ADC_InitStructure);
 
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_55Cycles5);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 2, ADC_SampleTime_55Cycles5);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_55Cycles5);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 2, ADC_SampleTime_55Cycles5);
 	ADC_DMACmd(ADC1, ENABLE);
 	ADC_Cmd(ADC1, ENABLE);
 
@@ -60,23 +61,6 @@ void FlexSensor_Configuration(void)
 		;
 	}
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-
-	// Calibration
-	FlexSensorBuffer[0] = 0;
-	while (FlexSensorBuffer[0] == 0)
-	{
-		;
-	}
-	FlexDefaultValue[0] = FlexSensorBuffer[0];
-	Log("FlexLeftDefault : %d", FlexDefaultValue[0]);
-
-	FlexSensorBuffer[1] = 0;
-	while (FlexSensorBuffer[1] == 0)
-	{
-		;
-	}
-	FlexDefaultValue[1] = FlexSensorBuffer[1];
-	Log("FlexRightDefault : %d", FlexDefaultValue[1]);
 }
 
 uint32_t GetLeftFlexSensorValue(void)
@@ -89,6 +73,21 @@ uint32_t GetLeftDefaultFlexSensorValue(void)
 	return FlexDefaultValue[0];
 }
 
+uint32_t GetLeftClickThreshold(void)
+{
+	return FlexClickThreshold[0];
+}
+
+void SetLeftClickThreshold(void)
+{
+	FlexClickThreshold[0] = GetLeftFlexSensorValue();
+}
+
+void SetLeftDefaultFlexSensorValue(void)
+{
+	FlexDefaultValue[0] = GetLeftFlexSensorValue();
+}
+
 uint32_t GetRightFlexSensorValue(void)
 {
 	return FlexSensorBuffer[1];
@@ -97,4 +96,45 @@ uint32_t GetRightFlexSensorValue(void)
 uint32_t GetRightDefaultFlexSensorValue(void)
 {
 	return FlexDefaultValue[1];
+}
+
+uint32_t GetRightClickThreshold(void)
+{
+	return FlexClickThreshold[1];
+}
+
+void SetRightClickThreshold(void)
+{
+	FlexClickThreshold[1] = GetRightFlexSensorValue();
+}
+
+void SetRightDefaultFlexSensorValue(void)
+{
+	FlexDefaultValue[1] = GetRightFlexSensorValue();
+}
+
+boolean IsLeftClickStart(void)
+{
+	return GetLeftFlexSensorValue() != 0
+			&& GetLeftFlexSensorValue() <= GetLeftClickThreshold();
+}
+
+boolean IsLeftClickEnd(void)
+{
+	return GetLeftFlexSensorValue() != 0
+			&& GetLeftFlexSensorValue()
+					>= (GetLeftDefaultFlexSensorValue() * 1.1);
+}
+
+boolean IsRightClickStart(void)
+{
+	return GetRightFlexSensorValue() != 0
+			&& GetRightFlexSensorValue() <= GetRightClickThreshold();
+}
+
+boolean IsRightClickEnd(void)
+{
+	return GetRightFlexSensorValue() != 0
+			&& GetRightFlexSensorValue()
+					>= (GetRightDefaultFlexSensorValue() * 1.1);
 }

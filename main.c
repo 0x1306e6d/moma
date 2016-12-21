@@ -3,6 +3,7 @@
 #include "timer.h"
 #include "flex.h"
 #include "hc_sr04.h"
+#include "button.h"
 
 // flash load "C:\Users\USER\Desktop\monday\motionMouse\Debug\motionMouse.axf"
 // flash load "C:\Users\USER\Desktop\monday\motionMouse\flashclear.axf"
@@ -22,8 +23,48 @@ int main()
 
 	Timer_Configuration();
 	FlexSensor_Configuration();
-
 	HC_SR04_Configuration();
+	Button_Configuration();
+
+	LogAt(1, "Are you stretch your second finger?");
+	while (!IsButton1Clicking())
+	{
+		LogAt(2, "flex value : %d", GetLeftFlexSensorValue());
+		DelayMilliSeconds(100);
+	}
+	SetLeftDefaultFlexSensorValue();
+	LogAt(2, "FlexLeftDefault : %d", GetLeftDefaultFlexSensorValue());
+	DelayMilliSeconds(1000);
+
+	LogAt(3, "Are you fold your second finger?");
+	while (!IsButton1Clicking())
+	{
+		LogAt(4, "flex value : %d", GetLeftFlexSensorValue());
+		DelayMilliSeconds(100);
+	}
+	SetLeftClickThreshold();
+	LogAt(4, "FlexLeftThreshold : %d", GetLeftClickThreshold());
+	DelayMilliSeconds(1000);
+
+	LogAt(1, "Are you stretch your third finger");
+	while (!IsButton1Clicking())
+	{
+		LogAt(2, "flex value : %d", GetRightFlexSensorValue());
+		DelayMilliSeconds(100);
+	}
+	SetRightDefaultFlexSensorValue();
+	LogAt(2, "FlexRightDefault : %d", GetRightDefaultFlexSensorValue());
+	DelayMilliSeconds(1000);
+
+	LogAt(3, "Are you fold your third finger?");
+	while (!IsButton1Clicking())
+	{
+		LogAt(4, "flex value : %d", GetRightFlexSensorValue());
+		DelayMilliSeconds(100);
+	}
+	SetRightClickThreshold();
+	LogAt(4, "FlexRightThreshold : %d", GetRightClickThreshold());
+	DelayMilliSeconds(1000);
 
 	while (true)
 	{
@@ -32,33 +73,27 @@ int main()
 
 		LogAt(8, "LeftFlex : %d", GetLeftFlexSensorValue());
 		LogAt(9, "RightFlex : %d", GetRightFlexSensorValue());
-		if (clicking_left
-				&& GetLeftFlexSensorValue()
-						<= (GetLeftDefaultFlexSensorValue() * 1.03))
+
+		if (clicking_left && IsLeftClickEnd())
 		{
-			Log("Left Click! at %d", GetCurrentTimeMillis());
+			Log("Left Click! value:%d", GetLeftFlexSensorValue());
 			clicking_left = false;
 		}
-		if (!clicking_left
-				&& GetLeftFlexSensorValue()
-						>= (GetLeftDefaultFlexSensorValue() * 1.5))
+		if (!clicking_left && IsLeftClickStart())
 		{
 			clicking_left = true;
 		}
 
-		if (clicking_right
-				&& GetRightFlexSensorValue()
-						<= (GetRightDefaultFlexSensorValue() * 1.03))
+		if (clicking_right && IsRightClickEnd())
 		{
-			Log("Right Click! at %d", GetCurrentTimeMillis());
+			Log("Right Click! value:%d", GetRightFlexSensorValue());
 			clicking_right = false;
 		}
-		if (!clicking_right
-				&& GetRightFlexSensorValue()
-						>= (GetRightDefaultFlexSensorValue() * 1.5))
+		if (!clicking_right && IsRightClickStart())
 		{
 			clicking_right = true;
 		}
+
 //		Request_HC_SR04_Top();
 //		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TOP) == Bit_RESET) {
 //			;
@@ -83,6 +118,6 @@ int main()
 //		}
 //		LogAt(14, "HC_SR04 : %d", m_distance);
 
-		DelayMilliSeconds(33);
+		DelayMilliSeconds(333);
 	}
 }
