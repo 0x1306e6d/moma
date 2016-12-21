@@ -14,6 +14,6 @@
 #define true 1
 #define false 0
 #define boolean uint8_t
-#define MAX_INFINITE_THRESHOLD 1000000
+#define MAX_INFINITE_THRESHOLD 5000000
 
 #endif
