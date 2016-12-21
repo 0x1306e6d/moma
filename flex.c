@@ -4,6 +4,16 @@ __IO uint32_t FlexSensorBuffer[2];
 __IO uint32_t FlexDefaultValue[2];
 __IO uint32_t FlexClickThreshold[2];
 
+uint32_t GetLeftClickThreshold(void);
+void SetLeftClickThreshold(uint32_t value);
+uint32_t GetLeftDefaultFlexSensorValue(void);
+void SetLeftDefaultFlexSensorValue(uint32_t value);
+
+uint32_t GetRightClickThreshold(void);
+void SetRightClickThreshold(uint32_t value);
+uint32_t GetRightDefaultFlexSensorValue(void);
+void SetRightDefaultFlexSensorValue(uint32_t value);
+
 void FlexSensor_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -65,49 +75,59 @@ void FlexSensor_Configuration(void)
 
 void Start_FlexSensor_Initializer(void)
 {
+	uint32_t value = 0;
+
 	// Left Default Value
 	LogAt(1, "Are you stretch your second finger?");
 	while (!IsButton1Clicking())
 	{
-		LogAt(2, "flex value : %d", GetLeftFlexSensorValue());
+		value = GetLeftFlexSensorValue();
+		LogAt(2, "flex value : %d", value);
 		DelayMilliSeconds(100);
 	}
-	SetLeftDefaultFlexSensorValue();
+	SetLeftDefaultFlexSensorValue(value);
 	LogAt(2, "FlexLeftDefault : %d", GetLeftDefaultFlexSensorValue());
 	DelayMilliSeconds(1000);
+	value = 0;
 
 	// Left Fold Threshold
 	LogAt(3, "Are you fold your second finger?");
 	while (!IsButton1Clicking())
 	{
-		LogAt(4, "flex value : %d", GetLeftFlexSensorValue());
+		value = GetLeftFlexSensorValue();
+		LogAt(4, "flex value : %d", value);
 		DelayMilliSeconds(100);
 	}
-	SetLeftClickThreshold();
+	SetLeftClickThreshold(value);
 	LogAt(4, "FlexLeftThreshold : %d", GetLeftClickThreshold());
 	DelayMilliSeconds(1000);
+	value = 0;
 
 	// Right Default Value
 	LogAt(1, "Are you stretch your third finger");
 	while (!IsButton1Clicking())
 	{
-		LogAt(2, "flex value : %d", GetRightFlexSensorValue());
+		value = GetLeftFlexSensorValue();
+		LogAt(2, "flex value : %d", value);
 		DelayMilliSeconds(100);
 	}
-	SetRightDefaultFlexSensorValue();
+	SetRightDefaultFlexSensorValue(value);
 	LogAt(2, "FlexRightDefault : %d", GetRightDefaultFlexSensorValue());
 	DelayMilliSeconds(1000);
+	value = 0;
 
 	// Right Fold Threshold
 	LogAt(3, "Are you fold your third finger?");
 	while (!IsButton1Clicking())
 	{
-		LogAt(4, "flex value : %d", GetRightFlexSensorValue());
+		value = GetLeftFlexSensorValue();
+		LogAt(4, "flex value : %d", value);
 		DelayMilliSeconds(100);
 	}
-	SetRightClickThreshold();
+	SetRightClickThreshold(value);
 	LogAt(4, "FlexRightThreshold : %d", GetRightClickThreshold());
 	DelayMilliSeconds(1000);
+	value = 0;
 
 }
 
@@ -116,49 +136,9 @@ uint32_t GetLeftFlexSensorValue(void)
 	return FlexSensorBuffer[0];
 }
 
-uint32_t GetLeftDefaultFlexSensorValue(void)
-{
-	return FlexDefaultValue[0];
-}
-
-uint32_t GetLeftClickThreshold(void)
-{
-	return FlexClickThreshold[0];
-}
-
-void SetLeftClickThreshold(void)
-{
-	FlexClickThreshold[0] = GetLeftFlexSensorValue();
-}
-
-void SetLeftDefaultFlexSensorValue(void)
-{
-	FlexDefaultValue[0] = GetLeftFlexSensorValue();
-}
-
 uint32_t GetRightFlexSensorValue(void)
 {
 	return FlexSensorBuffer[1];
-}
-
-uint32_t GetRightDefaultFlexSensorValue(void)
-{
-	return FlexDefaultValue[1];
-}
-
-uint32_t GetRightClickThreshold(void)
-{
-	return FlexClickThreshold[1];
-}
-
-void SetRightClickThreshold(void)
-{
-	FlexClickThreshold[1] = GetRightFlexSensorValue();
-}
-
-void SetRightDefaultFlexSensorValue(void)
-{
-	FlexDefaultValue[1] = GetRightFlexSensorValue();
 }
 
 boolean IsLeftClickStart(void)
@@ -185,4 +165,43 @@ boolean IsRightClickEnd(void)
 	return GetRightFlexSensorValue() != 0
 			&& GetRightFlexSensorValue()
 					>= (GetRightDefaultFlexSensorValue() * 1.1);
+}
+uint32_t GetLeftClickThreshold(void)
+{
+	return FlexClickThreshold[0];
+}
+
+void SetLeftClickThreshold(uint32_t value)
+{
+	FlexClickThreshold[0] = value;
+}
+
+uint32_t GetLeftDefaultFlexSensorValue(void)
+{
+	return FlexDefaultValue[0];
+}
+
+void SetLeftDefaultFlexSensorValue(uint32_t value)
+{
+	FlexDefaultValue[0] = value;
+}
+
+uint32_t GetRightClickThreshold(void)
+{
+	return FlexClickThreshold[1];
+}
+
+void SetRightClickThreshold(uint32_t value)
+{
+	FlexClickThreshold[1] = value;
+}
+
+uint32_t GetRightDefaultFlexSensorValue(void)
+{
+	return FlexDefaultValue[1];
+}
+
+void SetRightDefaultFlexSensorValue(uint32_t value)
+{
+	FlexDefaultValue[1] = value;
 }
