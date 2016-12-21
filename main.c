@@ -12,8 +12,6 @@
 void HC_SR04_Configuration(void);
 void Request_HC_SR04(void);
 
-uint32_t StartTime = 0;
-
 int main() {
 	SystemInit();
 	Logger_Configuration();
@@ -73,28 +71,24 @@ void HC_SR04_Configuration(void) {
 }
 
 void Request_HC_SR04(void) {
+	LogAt(12, "Request HC_SR04 at %d", GetCurrentTimeMillis());
 	GPIO_SetBits(GPIOC, HC_SR04_TRIGGER);
 	DelayMilliSeconds(10);
 	GPIO_ResetBits(GPIOC, HC_SR04_TRIGGER);
-
-	StartTime = GetCurrentTimeMillis();
-	LogAt(13, "HC_SR04. StartTime=%d", StartTime);
 }
 
 void EXTI9_5_IRQHandler(void) {
 	uint32_t distance = 0;
 
 	if (EXTI_GetITStatus(EXTI_Line8) != RESET) {
-		EXTI_ClearITPendingBit(EXTI_Line8);
-
 		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO) == Bit_SET) {
 			distance++;
 		}
+		if (distance > 0) {
+			LogAt(13, "HC_SR04. Distance=%d", distance);
+		}
+		EXTI_ClearITPendingBit(EXTI_Line8);
 
-		LogAt(14, "HC_SR04. Distance=%d", distance);
-		StartTime = 0;
-
-		DelayMilliSeconds(1000);
 		Request_HC_SR04();
 	}
 }
