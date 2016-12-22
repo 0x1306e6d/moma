@@ -6,10 +6,7 @@ import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 import java.awt.*;
 import java.awt.event.InputEvent;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 /**
  * Class that implements an SPP Server which accepts single line of
@@ -44,6 +41,16 @@ public class MouseAgent {
         InputStream inStream = connection.openInputStream();
         BufferedReader bReader = new BufferedReader(new InputStreamReader(inStream));
 
+        OutputStream outStream = connection.openOutputStream();
+        PrintWriter pWriter = new PrintWriter(new OutputStreamWriter(outStream));
+
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        pWriter.print(String.format("x %d", (int) screen.getWidth()));
+        pWriter.flush();
+        pWriter.print(String.format("y %d", (int) screen.getHeight()));
+        pWriter.flush();
+        System.out.println("write screen size : " + screen.getWidth() + "x" + screen.getHeight());
+
         String lineRead;
         while ((lineRead = bReader.readLine()) != null) {
             System.out.println(lineRead);
@@ -51,6 +58,7 @@ public class MouseAgent {
             String opcode = cmds[0];
 
             switch (opcode) {
+                // move mouse
                 case "m": {
                     int x = Integer.parseInt(cmds[1]);
                     int y = Integer.parseInt(cmds[2]);
@@ -70,6 +78,40 @@ public class MouseAgent {
                         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
                         System.out.println("Click left");
                     }
+                    break;
+                }
+                // mouse press
+                case "p": {
+                    String finger = cmds[1];
+                    if (finger.startsWith("r")) {
+                        robot.mousePress(InputEvent.BUTTON3_MASK);
+                        System.out.println("Press right mouse");
+                    } else if (finger.startsWith("l")) {
+                        robot.mousePress(InputEvent.BUTTON1_MASK);
+                        System.out.println("press left mouse");
+                    }
+                    break;
+                }
+                // mouse release
+                case "r": {
+                    String finger = cmds[1];
+                    if (finger.startsWith("r")) {
+                        robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
+                        System.out.println("Release right mouse");
+                    } else if (finger.startsWith("l")) {
+                        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                        System.out.println("Release left mouse");
+                    }
+                    break;
+                }
+                // screen size
+                case "s": {
+                    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                    pWriter.print(String.format("x %d", (int) screenSize.getWidth()));
+                    pWriter.flush();
+                    pWriter.print(String.format("y %d", (int) screenSize.getHeight()));
+                    pWriter.flush();
+                    System.out.println("write screen size : " + screenSize.getWidth() + "x" + screenSize.getHeight());
                     break;
                 }
             }
