@@ -11,6 +11,10 @@
 #include "stm32f10x_rtc.h"
 #include "misc.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #define true 1
 #define false 0
 #define boolean uint8_t
