@@ -11,7 +11,6 @@
 
 void doLeftClick(void);
 void doRightClick(void);
-void ReceiveUSART1(void);
 void ReceiveUSART2(void);
 
 void WaitForTransmissionComplete(USART_TypeDef* USARTx);
@@ -21,8 +20,6 @@ uint32_t m_screen_width = 0;
 uint32_t m_distance_lr = 0;
 uint32_t m_distance_tb = 0;
 
-char usart1_buffer[100];
-uint32_t usart1_buffer_index = 0;
 char usart2_buffer[100];
 uint32_t usart2_buffer_index = 0;
 
@@ -153,13 +150,6 @@ void USART1_IRQHandler(void)
 	{
 		char c = USART_ReceiveData(USART1) & 0xFF;
 		Log("USART1 %c", c);
-		// usart1_buffer[usart1_buffer_index] = c;
-		// usart1_buffer_index++;
-		// if (c == 0 || c == '\n')
-		// {
-		// 	ReceiveUSART1();
-		// 	usart1_buffer_index = 0;
-		// }
 
 		USART_SendData(USART2, c);
 		WaitForTransmissionComplete(USART2);
@@ -174,13 +164,14 @@ void USART2_IRQHandler(void)
 	{
 		char c = USART_ReceiveData(USART2) & 0xFF;
 		Log("USART2 %c", c);
-		// usart2_buffer[usart2_buffer_index] = c;
-		// usart2_buffer_index++;
-		// if (c == 0 || c == '\n')
-		// {
-		// 	ReceiveUSART2();
-		// 	usart1_buffer_index = 0;
-		// }
+
+		usart2_buffer[usart2_buffer_index] = c;
+		usart2_buffer_index++;
+		if (c == 0 || c == '\n')
+		{
+			ReceiveUSART2();
+			usart2_buffer_index = 0;
+		}
 
 		USART_SendData(USART1, c);
 		WaitForTransmissionComplete(USART1);
@@ -189,20 +180,16 @@ void USART2_IRQHandler(void)
 	}
 }
 
-void ReceiveUSART1(void)
-{
-	usart1_buffer[usart1_buffer_index] = 0;
-	Log("recv1:%s", usart1_buffer);
-}
-
 void ReceiveUSART2(void)
 {
-	uint32_t len;
-	char opcode = usart2_buffer[0];
+	int len;
+	char opcode;
 
-	usart2_buffer[usart1_buffer_index] = 0;
-	len = strlen(usart2_buffer);
+	usart2_buffer[usart2_buffer_index] = 0;
 	Log("recv2:%s", usart2_buffer);
+
+	len = strlen(usart2_buffer);
+	opcode = usart2_buffer[0];
 
 	if (opcode == 'x')
 	{
