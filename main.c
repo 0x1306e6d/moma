@@ -152,7 +152,7 @@ void USART1_IRQHandler(void)
 		char c = USART_ReceiveData(USART1) & 0xFF;
 		usart1_buffer[usart1_buffer_index] = c;
 		usart1_buffer_index++;
-		if (c == 0)
+		if (c == 0 || c == '\n')
 		{
 			ReceiveUSART1();
 			usart1_buffer_index = 0;
@@ -172,7 +172,7 @@ void USART2_IRQHandler(void)
 		char c = USART_ReceiveData(USART2) & 0xFF;
 		usart2_buffer[usart2_buffer_index] = c;
 		usart2_buffer_index++;
-		if (c == 0)
+		if (c == 0 || c == '\n')
 		{
 			ReceiveUSART2();
 			usart1_buffer_index = 0;
