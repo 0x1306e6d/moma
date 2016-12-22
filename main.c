@@ -13,8 +13,6 @@ void doLeftClick(void);
 void doRightClick(void);
 void ReceiveUSART2(void);
 
-void WaitForTransmissionComplete(USART_TypeDef* USARTx);
-
 uint32_t m_screen_height = 0;
 uint32_t m_screen_width = 0;
 uint32_t m_distance_lr = 0;
@@ -27,7 +25,6 @@ int main()
 {
 	uint32_t distance_lr = 0;
 	uint32_t distance_tb = 0;
-	uint32_t infinite_prevention = 0;
 	boolean clicking_left = false;
 	boolean clicking_right = false;
 
@@ -36,11 +33,10 @@ int main()
 	Timer_Configuration();
 	Button_Configuration();
 
+//	Bluetooth_Configuration();
 	HC_SR04_Configuration();
-
-	Bluetooth_Configuration();
-
 	FlexSensor_Configuration();
+
 	Start_FlexSensor_Initializer();
 
 	while (true)
@@ -70,63 +66,37 @@ int main()
 			clicking_right = true;
 		}
 
-//		// Left-Right HC_SR04
-//		Request_HC_SR04_LR();
-//		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
-//		{
-//			infinite_prevention++;
-//			if (infinite_prevention > MAX_INFINITE_THRESHOLD)
-//			{
-//				Log("Prevent infinite loop");
-//				break;
-//			}
-//		}
-//		infinite_prevention = 0;
-//		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
-//		{
-//			distance_lr++;
-//			infinite_prevention++;
-//			if (infinite_prevention > MAX_INFINITE_THRESHOLD)
-//			{
-//				Log("Prevent infinite loop");
-//				break;
-//			}
-//		}
-//		infinite_prevention = 0;
-//		if (distance_lr > 0)
-//		{
-//			m_distance_lr = distance_lr;
-//		}
-//		LogAt(11, "HC_SR04 LR : %d", m_distance_lr);
+		// Left-Right HC_SR04
+		Request_HC_SR04_LR();
+		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
+		{
+			distance_lr++;
+		}
+		if (distance_lr > 0)
+		{
+			m_distance_lr = distance_lr;
+		}
+		LogAt(11, "HC_SR04 LR : %d", m_distance_lr);
 //
-//		// Top-Bottom HC_SR04
-//		Request_HC_SR04_TB();
-//		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
-//		{
-//			infinite_prevention++;
-//			if (infinite_prevention > MAX_INFINITE_THRESHOLD)
-//			{
-//				Log("Prevent infinite loop");
-//				break;
-//			}
-//		}
-//		infinite_prevention = 0;
-//		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
-//		{
-//			distance_tb++;
-//			infinite_prevention++;
-//			if (infinite_prevention > MAX_INFINITE_THRESHOLD)
-//			{
-//				Log("Prevent infinite loop");
-//				break;
-//			}
-//		}
-//		infinite_prevention = 0;
-//		if (distance_tb > 0)
-//		{
-//			m_distance_tb = distance_tb;
-//		}
-//		LogAt(13, "HC_SR04 TB : %d", m_distance_tb);
+		// Top-Bottom HC_SR04
+		Request_HC_SR04_TB();
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
+		{
+			distance_tb++;
+		}
+		if (distance_tb > 0)
+		{
+			m_distance_tb = distance_tb;
+		}
+		LogAt(13, "HC_SR04 TB : %d", m_distance_tb);
 
 		DelayMilliSeconds(33);
 	}
@@ -135,7 +105,7 @@ int main()
 void doLeftClick(void)
 {
 	USART_WriteString(USART2, "c l");
-	Log("Left click at %d", GetCurrentTimeMillis());	
+	Log("Left click at %d", GetCurrentTimeMillis());
 }
 
 void doRightClick(void)
@@ -146,50 +116,49 @@ void doRightClick(void)
 
 void USART1_IRQHandler(void)
 {
+	char c;
+
 	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
 	{
-		char c = USART_ReceiveData(USART1) & 0xFF;
-		Log("USART1 %c", c);
+		c = (char) USART_ReceiveData(USART1);
 
 		USART_SendData(USART2, c);
 		WaitForTransmissionComplete(USART2);
 
+		Log("USART1 [%c]", c);
 		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
 	}
 }
 
 void USART2_IRQHandler(void)
 {
+	char c;
+
 	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
 	{
-		char c = USART_ReceiveData(USART2) & 0xFF;
-		Log("USART2 %c", c);
-
-		usart2_buffer[usart2_buffer_index] = c;
-		usart2_buffer_index++;
-		if (c == 0 || c == '\n')
-		{
-			ReceiveUSART2();
-			usart2_buffer_index = 0;
-		}
+		c = (char) USART_ReceiveData(USART2);
 
 		USART_SendData(USART1, c);
 		WaitForTransmissionComplete(USART1);
 
+		Log("USART2 [%c]", c);
+
+//		usart2_buffer[usart2_buffer_index] = c;
+//		usart2_buffer_index++;
+//		if (c == 0 || c == '\n')
+//		{
+//			ReceiveUSART2();
+//			usart2_buffer_index = 0;
+//		}
 		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 	}
 }
 
 void ReceiveUSART2(void)
 {
-	int len;
-	char opcode;
-
+	char opcode = usart2_buffer[0];
 	usart2_buffer[usart2_buffer_index] = 0;
 	Log("recv2:%s", usart2_buffer);
-
-	len = strlen(usart2_buffer);
-	opcode = usart2_buffer[0];
 
 	if (opcode == 'x')
 	{
