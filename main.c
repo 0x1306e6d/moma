@@ -13,15 +13,17 @@ void doLeftClick(void);
 void doRightClick(void);
 void MoveMouse(uint32_t x, uint32_t y);
 void ReceiveUSART2(void);
+void Start_HC_SR04_Initializer(void);
 
 uint32_t m_screen_height = 1020;
 uint32_t m_screen_width = 1980;
 uint32_t m_screen_height_standard = 0;
 uint32_t m_screen_width_standard = 0;
+
 uint32_t m_distance_lr = 0;
-uint32_t m_distance_lr_before = 0;
+uint32_t m_distance_lr_before = -1;
 uint32_t m_distance_tb = 0;
-uint32_t m_distance_tb_before = 0;
+uint32_t m_distance_tb_before = -1;
 
 char usart2_buffer[100];
 uint32_t usart2_buffer_index = 0;
@@ -88,7 +90,7 @@ int main()
 	if (distance_lr > 0)
 	{
 	    m_distance_lr = distance_lr;
-	    if (m_distance_lr_before == 0)
+	    if (m_distance_lr_before == -1)
 	    {
 		m_distance_lr_before = m_distance_lr;
 	    }
@@ -108,7 +110,7 @@ int main()
 	if (distance_tb > 0)
 	{
 	    m_distance_tb = distance_tb;
-	    if (m_distance_tb_before == 0)
+	    if (m_distance_tb_before == -1)
 	    {
 		m_distance_tb_before = m_distance_tb;
 	    }
@@ -203,4 +205,56 @@ void ReceiveUSART2(void)
 	m_screen_height = atoi(usart2_buffer + 2);
 	Log("Height : %d", m_screen_height);
     }
+}
+
+void Start_HC_SR04_Initializer(void)
+{
+    uint32_t value_tb = 0;
+    uint32_t value_lr = 0;
+
+    LogAt(1, "Are you center?");
+    while (!IsButton1Clicking())
+    {
+	value_tb = 0;
+	value_lr = ;
+
+	// Top-Bottom HC_SR04
+	Request_HC_SR04_TB();
+	while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
+	{
+	    ;
+	}
+	while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
+	{
+	    value_tb++;
+	}
+	if (value_tb > 0)
+	{
+	    LogAt(2, "top-bottom : %d", value_tb);
+	}
+
+	// Left-Right HC_SR04
+	Request_HC_SR04_LR();
+	while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
+	{
+	    ;
+	}
+	while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
+	{
+	    value_lr++;
+	}
+	if (value_lr > 0)
+	{
+	    LogAt(3, "left-right : %d", value_lr);
+	}
+
+	DelayMilliSeconds(100);
+    }
+
+    m_screen_height_standard = value_tb;
+    m_screen_width_standard = value_lr;
+    LogAt(4, "standard x:%d", m_screen_width_standard);
+    LogAt(5, "standard y:%d", m_screen_height_standard);
+
+    DelayMilliSeconds(1000);
 }
