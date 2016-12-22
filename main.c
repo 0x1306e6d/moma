@@ -7,7 +7,7 @@
 #include "bluetooth.h"
 
 // flash load "C:\Users\USER\Desktop\monday\motionMouse\Debug\motionMouse.axf"
-// flash load "E:\monday\motionMouse\Debug\motionMouse.axf"
+// flash load "D:\monday\motionMouse\Debug\motionMouse.axf"
 // flash load "C:\Users\USER\Desktop\monday\motionMouse\flashclear.axf"
 
 void doLeftClick(void);
@@ -18,8 +18,10 @@ void Start_HC_SR04_Initializer(void);
 
 uint32_t m_screen_height = 1020;
 uint32_t m_screen_width = 1980;
-uint32_t m_screen_height_standard = 0;
-uint32_t m_screen_width_standard = 0;
+uint32_t m_height_left_edge = 0;
+uint32_t m_width_left_edge = 0;
+uint32_t m_height_right_edge = 0;
+uint32_t m_width_right_edge = 0;
 
 uint32_t m_distance_lr = 0;
 uint32_t m_distance_lr_before = 0;
@@ -120,10 +122,8 @@ int main()
 				&& ((m_distance_tb < (m_distance_tb_before * 1.5))
 						&& (m_distance_tb > (m_distance_tb_before * 0.5))))
 		{
-			uint32_t x = ((double) m_distance_lr / (double) m_screen_width_standard)
-					* (m_screen_width / 2);
-			uint32_t y = ((double) m_distance_tb / (double) m_screen_height_standard)
-					* (m_screen_height / 2);
+			uint32_t x = ((double) (m_distance_lr - m_width_left_edge) / (double) (m_width_right_edge - m_width_left_edge) * m_screen_width);
+			uint32_t y = ((double) (m_distance_tb - m_height_left_edge) / (double) (m_height_right_edge - m_height_left_edge) * m_screen_height);
 
 			MoveMouse(x, y);
 			m_distance_lr_before = m_distance_lr;
@@ -215,7 +215,7 @@ void Start_HC_SR04_Initializer(void)
 	uint32_t value_tb = 0;
 	uint32_t value_lr = 0;
 
-	LogAt(1, "Are you center?");
+	LogAt(1, "Are you left top edge?");
 	while (!IsButton1Clicking())
 	{
 		value_tb = 0;
@@ -254,10 +254,54 @@ void Start_HC_SR04_Initializer(void)
 		DelayMilliSeconds(100);
 	}
 
-	m_screen_height_standard = value_tb;
-	m_screen_width_standard = value_lr;
-	LogAt(4, "standard x:%d", m_screen_width_standard);
-	LogAt(5, "standard y:%d", m_screen_height_standard);
+	m_height_left_edge = value_tb;
+	m_width_left_edge = value_lr;
+	LogAt(4, "left x:%d", m_width_left_edge);
+	LogAt(5, "left y:%d", m_height_left_edge);
 
 	DelayMilliSeconds(1000);
+	
+	LogAt(1, "Are you right bottom edge?");
+	while (!IsButton1Clicking())
+	{
+		value_tb = 0;
+		value_lr = 0;
+
+		// Top-Bottom HC_SR04
+		Request_HC_SR04_TB();
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
+		{
+			value_tb++;
+		}
+		if (value_tb > 0)
+		{
+			LogAt(2, "top-bottom : %d", value_tb);
+		}
+
+		// Left-Right HC_SR04
+		Request_HC_SR04_LR();
+		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
+		{
+			value_lr++;
+		}
+		if (value_lr > 0)
+		{
+			LogAt(3, "left-right : %d", value_lr);
+		}
+
+		DelayMilliSeconds(100);
+	}
+
+	m_height_right_edge = value_tb;
+	m_width_right_edge = value_lr;
+	LogAt(4, "right x:%d", m_width_right_edge);
+	LogAt(5, "right y:%d", m_height_right_edge);
 }
