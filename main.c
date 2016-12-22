@@ -151,13 +151,13 @@ void USART1_IRQHandler(void)
 	{
 		char c = USART_ReceiveData(USART1) & 0xFF;
 		Log("USART1 %c", c);
-		usart1_buffer[usart1_buffer_index] = c;
-		usart1_buffer_index++;
-		if (c == 0 || c == '\n')
-		{
-			ReceiveUSART1();
-			usart1_buffer_index = 0;
-		}
+		// usart1_buffer[usart1_buffer_index] = c;
+		// usart1_buffer_index++;
+		// if (c == 0 || c == '\n')
+		// {
+		// 	ReceiveUSART1();
+		// 	usart1_buffer_index = 0;
+		// }
 
 		USART_SendData(USART2, c);
 		WaitForTransmissionComplete(USART2);
@@ -171,13 +171,14 @@ void USART2_IRQHandler(void)
 	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
 	{
 		char c = USART_ReceiveData(USART2) & 0xFF;
-		usart2_buffer[usart2_buffer_index] = c;
-		usart2_buffer_index++;
-		if (c == 0 || c == '\n')
-		{
-			ReceiveUSART2();
-			usart1_buffer_index = 0;
-		}
+		Log("USART2 %c", c);
+		// usart2_buffer[usart2_buffer_index] = c;
+		// usart2_buffer_index++;
+		// if (c == 0 || c == '\n')
+		// {
+		// 	ReceiveUSART2();
+		// 	usart1_buffer_index = 0;
+		// }
 
 		USART_SendData(USART1, c);
 		WaitForTransmissionComplete(USART1);
