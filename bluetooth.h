@@ -10,5 +10,7 @@
 #define BLU_RX_PIN_2 GPIO_Pin_10
 
 void Bluetooth_Configuration(void);
+void USART_WriteString(USART_TypeDef* USARTx, char* message, ...);
+void WaitForTransmissionComplete(USART_TypeDef* USARTx);
 
 #endif

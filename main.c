@@ -137,11 +137,13 @@ int main()
 
 void doLeftClick(void)
 {
-	Log("Left click at %d", GetCurrentTimeMillis());
+	USART_WriteString(USART2, "c l");
+	Log("Left click at %d", GetCurrentTimeMillis());	
 }
 
 void doRightClick(void)
 {
+	USART_WriteString(USART2, "c r");
 	Log("Right click at %d", GetCurrentTimeMillis());
 }
 
@@ -211,13 +213,5 @@ void ReceiveUSART2(void)
 	{
 		m_screen_height = atoi(usart2_buffer + 2);
 		Log("Height : %d", m_screen_height);
-	}
-}
-
-void WaitForTransmissionComplete(USART_TypeDef* USARTx)
-{
-	while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET)
-	{
-		;
 	}
 }
