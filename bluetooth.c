@@ -23,20 +23,7 @@ void Bluetooth_Configuration(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	// USART 1 Configuration
-	USART_InitStructure.USART_BaudRate = 57600;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl =
-	USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-
-	USART_Init(USART1, &USART_InitStructure);
-	USART_Cmd(USART1, ENABLE);
-	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-
-	// USART 2 Configuration
+	// USART Configuration
 	USART_InitStructure.USART_BaudRate = 9600;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
@@ -45,9 +32,8 @@ void Bluetooth_Configuration(void)
 	USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
 
+	USART_Init(USART1, &USART_InitStructure);
 	USART_Init(USART2, &USART_InitStructure);
-	USART_Cmd(USART2, ENABLE);
-	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
 	// NVIC Configuration
 	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
@@ -61,4 +47,9 @@ void Bluetooth_Configuration(void)
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
+
+	USART_Cmd(USART1, ENABLE);
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+	USART_Cmd(USART2, ENABLE);
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 }

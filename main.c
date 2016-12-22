@@ -150,6 +150,7 @@ void USART1_IRQHandler(void)
 	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
 	{
 		char c = USART_ReceiveData(USART1) & 0xFF;
+		Log("USART1 %c", c);
 		usart1_buffer[usart1_buffer_index] = c;
 		usart1_buffer_index++;
 		if (c == 0 || c == '\n')
@@ -187,13 +188,17 @@ void USART2_IRQHandler(void)
 
 void ReceiveUSART1(void)
 {
+	usart1_buffer[usart1_buffer_index] = 0;
 	Log("recv1:%s", usart1_buffer);
 }
 
 void ReceiveUSART2(void)
 {
+	uint32_t len;
 	char opcode = usart2_buffer[0];
-	uint32_t len = strlen(usart2_buffer);
+
+	usart2_buffer[usart1_buffer_index] = 0;
+	len = strlen(usart2_buffer);
 	Log("recv2:%s", usart2_buffer);
 
 	if (opcode == 'x')
