@@ -33,7 +33,7 @@ int main()
 	Timer_Configuration();
 	Button_Configuration();
 
-//	Bluetooth_Configuration();
+	Bluetooth_Configuration();
 	HC_SR04_Configuration();
 	FlexSensor_Configuration();
 
@@ -81,7 +81,7 @@ int main()
 			m_distance_lr = distance_lr;
 		}
 		LogAt(11, "HC_SR04 LR : %d", m_distance_lr);
-//
+
 		// Top-Bottom HC_SR04
 		Request_HC_SR04_TB();
 		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
@@ -104,13 +104,13 @@ int main()
 
 void doLeftClick(void)
 {
-	USART_WriteString(USART2, "c l");
+//	USART_WriteString(USART2, "c l");
 	Log("Left click at %d", GetCurrentTimeMillis());
 }
 
 void doRightClick(void)
 {
-	USART_WriteString(USART2, "c r");
+//	USART_WriteString(USART2, "c r");
 	Log("Right click at %d", GetCurrentTimeMillis());
 }
 
