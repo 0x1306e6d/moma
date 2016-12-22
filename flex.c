@@ -32,7 +32,7 @@ void FlexSensor_Configuration(void)
 
 	// DMA Configuration
 	DMA_DeInit(DMA1_Channel1);
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &ADC1->DR;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) & ADC1->DR;
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) FlexSensorBuffer;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 	DMA_InitStructure.DMA_BufferSize = 2;

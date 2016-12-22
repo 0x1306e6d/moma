@@ -7,6 +7,7 @@
 #include "bluetooth.h"
 
 // flash load "C:\Users\USER\Desktop\monday\motionMouse\Debug\motionMouse.axf"
+// flash load "E:\monday\motionMouse\Debug\motionMouse.axf"
 // flash load "C:\Users\USER\Desktop\monday\motionMouse\flashclear.axf"
 
 void doLeftClick(void);
@@ -21,240 +22,242 @@ uint32_t m_screen_height_standard = 0;
 uint32_t m_screen_width_standard = 0;
 
 uint32_t m_distance_lr = 0;
-uint32_t m_distance_lr_before = -1;
+uint32_t m_distance_lr_before = 0;
 uint32_t m_distance_tb = 0;
-uint32_t m_distance_tb_before = -1;
+uint32_t m_distance_tb_before = 0;
 
 char usart2_buffer[100];
 uint32_t usart2_buffer_index = 0;
 
 int main()
 {
-    uint32_t x;
-    uint32_t y;
-    uint32_t distance_lr = 0;
-    uint32_t distance_tb = 0;
-    boolean clicking_left = false;
-    boolean clicking_right = false;
+	uint32_t distance_lr = 0;
+	uint32_t distance_tb = 0;
+	boolean clicking_left = false;
+	boolean clicking_right = false;
 
-    SystemInit();
-    Logger_Configuration();
-    Timer_Configuration();
-    Button_Configuration();
+	SystemInit();
+	Logger_Configuration();
+	Timer_Configuration();
+	Button_Configuration();
 
-    Bluetooth_Configuration();
-    HC_SR04_Configuration();
-    FlexSensor_Configuration();
+	Bluetooth_Configuration();
+	HC_SR04_Configuration();
+	FlexSensor_Configuration();
 
-    Start_FlexSensor_Initializer();
+	Start_FlexSensor_Initializer();
+	Start_HC_SR04_Initializer();
 
-    while (true)
-    {
-	x = 0;
-	y = 0;
-	distance_lr = 0;
-	distance_tb = 0;
+	while (true)
+	{
+		distance_lr = 0;
+		distance_tb = 0;
 
-	// Left Click
-	if (clicking_left && IsLeftClickEnd())
-	{
-	    doLeftClick();
-	    clicking_left = false;
-	}
-	if (!clicking_left && IsLeftClickStart())
-	{
-	    clicking_left = true;
-	}
+		// Left Click
+		if (clicking_left && IsLeftClickEnd())
+		{
+			doLeftClick();
+			clicking_left = false;
+		}
+		if (!clicking_left && IsLeftClickStart())
+		{
+			clicking_left = true;
+		}
 
-	// Right Click
-	if (clicking_right && IsRightClickEnd())
-	{
-	    doRightClick();
-	    clicking_right = false;
-	}
-	if (!clicking_right && IsRightClickStart())
-	{
-	    clicking_right = true;
-	}
+		// Right Click
+		if (clicking_right && IsRightClickEnd())
+		{
+			doRightClick();
+			clicking_right = false;
+		}
+		if (!clicking_right && IsRightClickStart())
+		{
+			clicking_right = true;
+		}
 
-	// Left-Right HC_SR04
-	Request_HC_SR04_LR();
-	while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
-	{
-	    ;
-	}
-	while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
-	{
-	    distance_lr++;
-	}
-	if (distance_lr > 0)
-	{
-	    m_distance_lr = distance_lr;
-	    if (m_distance_lr_before == -1)
-	    {
-		m_distance_lr_before = m_distance_lr;
-	    }
-	}
-	LogAt(11, "HC_SR04 LR : %d", m_distance_lr);
+		// Left-Right HC_SR04
+		Request_HC_SR04_LR();
+		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
+		{
+			distance_lr++;
+		}
+		if (distance_lr > 0)
+		{
+			m_distance_lr = distance_lr;
+			if (m_distance_lr_before == 0)
+			{
+				m_distance_lr_before = m_distance_lr;
+			}
+		}
+		LogAt(11, "HC_SR04 LR : %d", m_distance_lr);
 
-	// Top-Bottom HC_SR04
-	Request_HC_SR04_TB();
-	while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
-	{
-	    ;
-	}
-	while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
-	{
-	    distance_tb++;
-	}
-	if (distance_tb > 0)
-	{
-	    m_distance_tb = distance_tb;
-	    if (m_distance_tb_before == -1)
-	    {
-		m_distance_tb_before = m_distance_tb;
-	    }
-	}
-	LogAt(13, "HC_SR04 TB : %d", m_distance_tb);
+		// Top-Bottom HC_SR04
+		Request_HC_SR04_TB();
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
+		{
+			distance_tb++;
+		}
+		if (distance_tb > 0)
+		{
+			m_distance_tb = distance_tb;
+			if (m_distance_tb_before == 0)
+			{
+				m_distance_tb_before = m_distance_tb;
+			}
+		}
+		LogAt(13, "HC_SR04 TB : %d", m_distance_tb);
 
-	if (((m_distance_lr < (m_distance_lr_before * 1.5)) && (m_distance_lr > (m_distance_lr_before * 0.5))) && ((m_distance_tb < (m_distance_tb_before * 1.5)) && (m_distance_tb > (m_distance_tb_before * 0.5))))
-	{
-	    uint32_t x = (m_distance_lr / m_screen_width_standard) * (m_screen_width / 2);
-	    uint32_t y = (m_distance_tb / m_screen_height_standard) * (m_screen_height / 2);
+		if (((m_distance_lr < (m_distance_lr_before * 1.5))
+				&& (m_distance_lr > (m_distance_lr_before * 0.5)))
+				&& ((m_distance_tb < (m_distance_tb_before * 1.5))
+						&& (m_distance_tb > (m_distance_tb_before * 0.5))))
+		{
+			uint32_t x = ((double) m_distance_lr / (double) m_screen_width_standard)
+					* (m_screen_width / 2);
+			uint32_t y = ((double) m_distance_tb / (double) m_screen_height_standard)
+					* (m_screen_height / 2);
 
-	    MoveMouse(x, y);
-	    m_distance_lr_before = m_distance_lr;
-	    m_distance_tb_before = m_distance_tb;
+			MoveMouse(x, y);
+			m_distance_lr_before = m_distance_lr;
+			m_distance_tb_before = m_distance_tb;
+		}
+
+		DelayMilliSeconds(33);
 	}
-
-	DelayMilliSeconds(33);
-    }
 }
 
 void doLeftClick(void)
 {
-    //	USART_WriteString(USART2, "c l");
-    Log("Left click at %d", GetCurrentTimeMillis());
+	//	USART_WriteString(USART2, "c l");
+	Log("Left click at %d", GetCurrentTimeMillis());
 }
 
 void doRightClick(void)
 {
-    //	USART_WriteString(USART2, "c r");
-    Log("Right click at %d", GetCurrentTimeMillis());
+	//	USART_WriteString(USART2, "c r");
+	Log("Right click at %d", GetCurrentTimeMillis());
 }
 
 void MoveMouse(uint32_t x, uint32_t y)
 {
-    // USART_WriteString(USART2, "m %d %d", x, y);
-    Log("Move Mouse %d %d", x, y);
+	// USART_WriteString(USART2, "m %d %d", x, y);
+	Log("Move Mouse %d %d", x, y);
 }
 
 void USART1_IRQHandler(void)
 {
-    char c;
+	char c;
 
-    if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
-    {
-	c = (char)USART_ReceiveData(USART1);
+	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
+	{
+		c = (char) USART_ReceiveData(USART1);
 
-	USART_SendData(USART2, c);
-	WaitForTransmissionComplete(USART2);
+		USART_SendData(USART2, c);
+		WaitForTransmissionComplete(USART2);
 
-	Log("USART1 [%c]", c);
-	USART_ClearITPendingBit(USART1, USART_IT_RXNE);
-    }
+		Log("USART1 [%c]", c);
+		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+	}
 }
 
 void USART2_IRQHandler(void)
 {
-    char c;
+	char c;
 
-    if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
-    {
-	c = (char)USART_ReceiveData(USART2);
+	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
+	{
+		c = (char) USART_ReceiveData(USART2);
 
-	USART_SendData(USART1, c);
-	WaitForTransmissionComplete(USART1);
+		USART_SendData(USART1, c);
+		WaitForTransmissionComplete(USART1);
 
-	Log("USART2 [%c]", c);
+		Log("USART2 [%c]", c);
 
-	//		usart2_buffer[usart2_buffer_index] = c;
-	//		usart2_buffer_index++;
-	//		if (c == 0 || c == '\n')
-	//		{
-	//			ReceiveUSART2();
-	//			usart2_buffer_index = 0;
-	//		}
-	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-    }
+		//		usart2_buffer[usart2_buffer_index] = c;
+		//		usart2_buffer_index++;
+		//		if (c == 0 || c == '\n')
+		//		{
+		//			ReceiveUSART2();
+		//			usart2_buffer_index = 0;
+		//		}
+		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+	}
 }
 
 void ReceiveUSART2(void)
 {
-    char opcode = usart2_buffer[0];
-    usart2_buffer[usart2_buffer_index] = 0;
-    Log("recv2:%s", usart2_buffer);
+	char opcode = usart2_buffer[0];
+	usart2_buffer[usart2_buffer_index] = 0;
+	Log("recv2:%s", usart2_buffer);
 
-    if (opcode == 'x')
-    {
-	m_screen_width = atoi(usart2_buffer + 2);
-	Log("Width : %d", m_screen_width);
-    }
-    else if (opcode == 'y')
-    {
-	m_screen_height = atoi(usart2_buffer + 2);
-	Log("Height : %d", m_screen_height);
-    }
+	if (opcode == 'x')
+	{
+		m_screen_width = atoi(usart2_buffer + 2);
+		Log("Width : %d", m_screen_width);
+	}
+	else if (opcode == 'y')
+	{
+		m_screen_height = atoi(usart2_buffer + 2);
+		Log("Height : %d", m_screen_height);
+	}
 }
 
 void Start_HC_SR04_Initializer(void)
 {
-    uint32_t value_tb = 0;
-    uint32_t value_lr = 0;
+	uint32_t value_tb = 0;
+	uint32_t value_lr = 0;
 
-    LogAt(1, "Are you center?");
-    while (!IsButton1Clicking())
-    {
-	value_tb = 0;
-	value_lr = ;
+	LogAt(1, "Are you center?");
+	while (!IsButton1Clicking())
+	{
+		value_tb = 0;
+		value_lr = 0;
 
-	// Top-Bottom HC_SR04
-	Request_HC_SR04_TB();
-	while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
-	{
-	    ;
-	}
-	while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
-	{
-	    value_tb++;
-	}
-	if (value_tb > 0)
-	{
-	    LogAt(2, "top-bottom : %d", value_tb);
+		// Top-Bottom HC_SR04
+		Request_HC_SR04_TB();
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOD, HC_SR04_ECHO_TB) == Bit_SET)
+		{
+			value_tb++;
+		}
+		if (value_tb > 0)
+		{
+			LogAt(2, "top-bottom : %d", value_tb);
+		}
+
+		// Left-Right HC_SR04
+		Request_HC_SR04_LR();
+		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
+		{
+			;
+		}
+		while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
+		{
+			value_lr++;
+		}
+		if (value_lr > 0)
+		{
+			LogAt(3, "left-right : %d", value_lr);
+		}
+
+		DelayMilliSeconds(100);
 	}
 
-	// Left-Right HC_SR04
-	Request_HC_SR04_LR();
-	while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_RESET)
-	{
-	    ;
-	}
-	while (GPIO_ReadInputDataBit(GPIOC, HC_SR04_ECHO_LR) == Bit_SET)
-	{
-	    value_lr++;
-	}
-	if (value_lr > 0)
-	{
-	    LogAt(3, "left-right : %d", value_lr);
-	}
+	m_screen_height_standard = value_tb;
+	m_screen_width_standard = value_lr;
+	LogAt(4, "standard x:%d", m_screen_width_standard);
+	LogAt(5, "standard y:%d", m_screen_height_standard);
 
-	DelayMilliSeconds(100);
-    }
-
-    m_screen_height_standard = value_tb;
-    m_screen_width_standard = value_lr;
-    LogAt(4, "standard x:%d", m_screen_width_standard);
-    LogAt(5, "standard y:%d", m_screen_height_standard);
-
-    DelayMilliSeconds(1000);
+	DelayMilliSeconds(1000);
 }
