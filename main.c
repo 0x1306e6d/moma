@@ -8,6 +8,7 @@
 
 // flash load "C:\Users\USER\Desktop\monday\motionMouse\Debug\motionMouse.axf"
 // flash load "D:\monday\motionMouse\Debug\motionMouse.axf"
+// flash load "D:\monday\motionMouse\flashclear.axf"
 // flash load "C:\Users\USER\Desktop\monday\motionMouse\flashclear.axf"
 
 void doLeftClick(void);
@@ -122,8 +123,12 @@ int main()
 				&& ((m_distance_tb < (m_distance_tb_before * 1.5))
 						&& (m_distance_tb > (m_distance_tb_before * 0.5))))
 		{
-			uint32_t x = ((double) (m_distance_lr - m_width_left_edge) / (double) (m_width_right_edge - m_width_left_edge) * m_screen_width);
-			uint32_t y = ((double) (m_distance_tb - m_height_left_edge) / (double) (m_height_right_edge - m_height_left_edge) * m_screen_height);
+			uint32_t x = ((double) (m_distance_lr - m_width_left_edge)
+					/ (double) (m_width_right_edge - m_width_left_edge)
+					* m_screen_width);
+			uint32_t y = ((double) (m_distance_tb - m_height_left_edge)
+					/ (double) (m_height_right_edge - m_height_left_edge)
+					* m_screen_height);
 
 			MoveMouse(x, y);
 			m_distance_lr_before = m_distance_lr;
@@ -136,19 +141,19 @@ int main()
 
 void doLeftClick(void)
 {
-	//	USART_WriteString(USART2, "c l");
+	USART_WriteString(USART1, "c l");
 	Log("Left click at %d", GetCurrentTimeMillis());
 }
 
 void doRightClick(void)
 {
-	//	USART_WriteString(USART2, "c r");
+	USART_WriteString(USART1, "c r");
 	Log("Right click at %d", GetCurrentTimeMillis());
 }
 
 void MoveMouse(uint32_t x, uint32_t y)
 {
-	// USART_WriteString(USART2, "m %d %d", x, y);
+	USART_WriteString(USART1, "m %d %d", x, y);
 	Log("Move Mouse %d %d", x, y);
 }
 
@@ -163,7 +168,7 @@ void USART1_IRQHandler(void)
 		USART_SendData(USART2, c);
 		WaitForTransmissionComplete(USART2);
 
-		Log("USART1 [%c]", c);
+		Log("USART1 %c", c);
 		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
 	}
 }
@@ -179,15 +184,6 @@ void USART2_IRQHandler(void)
 		USART_SendData(USART1, c);
 		WaitForTransmissionComplete(USART1);
 
-		Log("USART2 [%c]", c);
-
-		//		usart2_buffer[usart2_buffer_index] = c;
-		//		usart2_buffer_index++;
-		//		if (c == 0 || c == '\n')
-		//		{
-		//			ReceiveUSART2();
-		//			usart2_buffer_index = 0;
-		//		}
 		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 	}
 }
@@ -260,7 +256,7 @@ void Start_HC_SR04_Initializer(void)
 	LogAt(5, "left y:%d", m_height_left_edge);
 
 	DelayMilliSeconds(1000);
-	
+
 	LogAt(1, "Are you right bottom edge?");
 	while (!IsButton1Clicking())
 	{
