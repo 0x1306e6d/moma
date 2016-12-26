@@ -67,19 +67,6 @@ public class MouseAgent {
                     System.out.println("Move to " + x + ", " + y);
                     break;
                 }
-                case "c": {
-                    String finger = cmds[1];
-                    if (finger.startsWith("r")) {
-                        robot.mousePress(InputEvent.BUTTON3_MASK);
-                        robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
-                        System.out.println("Click right");
-                    } else if (finger.startsWith("l")) {
-                        robot.mousePress(InputEvent.BUTTON1_MASK);
-                        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-                        System.out.println("Click left");
-                    }
-                    break;
-                }
                 // mouse press
                 case "p": {
                     String finger = cmds[1];
