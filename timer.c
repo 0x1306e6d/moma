@@ -1,6 +1,6 @@
 #include "timer.h"
 
-void Timer_Configuration()
+void TimerInit()
 {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
 	PWR_BackupAccessCmd(ENABLE);
@@ -19,7 +19,7 @@ void Timer_Configuration()
 	RTC_WaitForLastTask();
 }
 
-void DelayMilliSeconds(uint32_t time)
+void DelayMillis(uint32_t time)
 {
 	uint32_t current = GetCurrentTimeMillis();
 	while (GetCurrentTimeMillis() < (current + time))

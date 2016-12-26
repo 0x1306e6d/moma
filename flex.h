@@ -2,18 +2,15 @@
 #define _FLEX_H
 
 #include "common.h"
-#include "logger.h"
-#include "timer.h"
-#include "button.h"
 
-void FlexSensor_Configuration(void);
-void Start_FlexSensor_Initializer(void);
+#define FLEX_INDEX_GPIO_PIN GPIO_Pin_5
+#define FLEX_INDEX_GPIO_TYPE GPIOA
 
-uint32_t GetLeftFlexSensorValue(void);
-uint32_t GetRightFlexSensorValue(void);
+#define FLEX_MIDDLE_GPIO_PIN GPIO_Pin_6
+#define FLEX_MIDDLE_GPIO_TYPE GPIOA
 
-boolean IsLeftClickStart(void);
-boolean IsLeftClickEnd(void);
-boolean IsRightClickStart(void);
-boolean IsRightClickEnd(void);
+void FlexSensorInit(void);
+void StartFlexSensorCalibration(void);
+void HandleFlexSensor(void);
+
 #endif

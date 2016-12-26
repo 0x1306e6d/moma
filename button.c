@@ -1,6 +1,6 @@
 #include "button.h"
 
-void Button_Configuration(void)
+void ButtonInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -12,7 +12,7 @@ void Button_Configuration(void)
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
-boolean IsButton1Clicking(void)
+boolean IsButtonClicking(uint16_t button)
 {
-	return !((*(volatile unsigned *) 0x40011408) & 0x00000800);
+	return !((*(volatile unsigned *) 0x40011408) & button);
 }

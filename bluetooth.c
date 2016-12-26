@@ -1,6 +1,10 @@
+#include <stdarg.h>
 #include "bluetooth.h"
+#include "printer.h"
 
-void Bluetooth_Configuration(void)
+void WaitForTransmissionComplete(USART_TypeDef* USARTx);
+
+void BluetoothInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
@@ -10,28 +14,29 @@ void Bluetooth_Configuration(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
 	// GPIO Configuration
 	// USART Rx
-	GPIO_InitStructure.GPIO_Pin = BLU_RX_PIN_1;
+	GPIO_InitStructure.GPIO_Pin = USART1_RX_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(USART1_RX_TYPE, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = BLU_RX_PIN_2;
+	GPIO_InitStructure.GPIO_Pin = USART2_RX_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(USART2_RX_TYPE, &GPIO_InitStructure);
 
 	// USART Tx
-	GPIO_InitStructure.GPIO_Pin = BLU_TX_PIN_1;
+	GPIO_InitStructure.GPIO_Pin = USART1_TX_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(USART1_TX_TYPE, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = BLU_TX_PIN_2;
+	GPIO_InitStructure.GPIO_Pin = USART2_TX_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(USART2_TX_TYPE, &GPIO_InitStructure);
 
 	// USART Configuration
 	USART_InitStructure.USART_BaudRate = 9600;
@@ -74,7 +79,7 @@ void Bluetooth_Configuration(void)
 	NVIC_ClearPendingIRQ(USART2_IRQn);
 }
 
-void USART_WriteString(USART_TypeDef *USARTx, char *message, ...)
+void BluetoothWriteString(char *message, ...)
 {
 	int i;
 	char buffer[30];
@@ -86,10 +91,11 @@ void USART_WriteString(USART_TypeDef *USARTx, char *message, ...)
 
 	for (i = 0; buffer[i] != 0; i++)
 	{
-		USART_SendData(USART1, buffer[i]);
-		WaitForTransmissionComplete(USART1);
+		USART_SendData(USART2, buffer[i]);
+		WaitForTransmissionComplete(USART2);
 	}
-	Log("WriteString:%s", buffer);
+
+	Print("WriteString : %s", buffer);
 }
 
 void WaitForTransmissionComplete(USART_TypeDef *USARTx)
@@ -97,5 +103,35 @@ void WaitForTransmissionComplete(USART_TypeDef *USARTx)
 	while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET)
 	{
 		;
+	}
+}
+
+void USART1_IRQHandler(void)
+{
+	char c;
+
+	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
+	{
+		c = (char) USART_ReceiveData(USART1);
+
+		USART_SendData(USART2, c);
+		WaitForTransmissionComplete(USART2);
+
+		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+	}
+}
+
+void USART2_IRQHandler(void)
+{
+	char c;
+
+	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
+	{
+		c = (char) USART_ReceiveData(USART2);
+
+		USART_SendData(USART1, c);
+		WaitForTransmissionComplete(USART1);
+
+		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 	}
 }

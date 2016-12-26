@@ -1,20 +1,38 @@
 #include "flex.h"
+#include "printer.h"
+#include "timer.h"
+#include "button.h"
+#include "bluetooth.h"
 
-__IO uint32_t FlexSensorBuffer[2];
-__IO uint32_t FlexDefaultValue[2];
-__IO uint32_t FlexClickThreshold[2];
+void PressLeftMouse(void);
+void ReleaseLeftMouse(void);
+void PressRightMouse(void);
+void ReleaseRightMouse(void);
 
-uint32_t GetLeftClickThreshold(void);
-void SetLeftClickThreshold(uint32_t value);
-uint32_t GetLeftDefaultFlexSensorValue(void);
-void SetLeftDefaultFlexSensorValue(uint32_t value);
+boolean IsIndexFoldEvent(void);
+boolean IsIndexStreekEvent(void);
+boolean IsMiddleFoldEvent(void);
+boolean IsMiddleStreekEvent(void);
+uint32_t GetIndexFlexValue(void);
+uint32_t GetIndexFlexDefaultValue(void);
+void SetIndexFlexDefaultValue(uint32_t value);
+uint32_t GetIndexFoldThreshold(void);
+void SetIndexFoldThreshold(uint32_t value);
 
-uint32_t GetRightClickThreshold(void);
-void SetRightClickThreshold(uint32_t value);
-uint32_t GetRightDefaultFlexSensorValue(void);
-void SetRightDefaultFlexSensorValue(uint32_t value);
+uint32_t GetMiddleFlexValue(void);
+uint32_t GetMiddleFlexDefaultValue(void);
+void SetMiddleFlexDefaultValue(uint32_t value);
+uint32_t GetMiddleFoldThreshold(void);
+void SetMiddleFoldThreshold(uint32_t value);
 
-void FlexSensor_Configuration(void)
+__IO uint32_t FlexSensorValue[2];
+__IO uint32_t FlexSensorDefaultValue[2];
+__IO uint32_t FlexSensorFoldThreshold[2];
+
+boolean m_index_folding = false;
+boolean m_middle_folding = false;
+
+void FlexSensorInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	ADC_InitTypeDef ADC_InitStructure;
@@ -26,14 +44,18 @@ void FlexSensor_Configuration(void)
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
 	// GPIO Configuration
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6;
+	GPIO_InitStructure.GPIO_Pin = FLEX_INDEX_GPIO_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(FLEX_INDEX_GPIO_TYPE, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = FLEX_MIDDLE_GPIO_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+	GPIO_Init(FLEX_MIDDLE_GPIO_TYPE, &GPIO_InitStructure);
 
 	// DMA Configuration
 	DMA_DeInit(DMA1_Channel1);
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) & ADC1->DR;
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) FlexSensorBuffer;
+	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) FlexSensorValue;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 	DMA_InitStructure.DMA_BufferSize = 2;
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
@@ -73,136 +95,189 @@ void FlexSensor_Configuration(void)
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 }
 
-void Start_FlexSensor_Initializer(void)
+void StartFlexSensorCalibration(void)
 {
 	uint32_t value = 0;
 
 	// Left Default Value
-	LogAt(1, "Are you stretch your second finger?");
-	while (!IsButton1Clicking())
+	PrintAt(1, "Are you stretch your second finger?");
+	while (!IsButtonClicking(BUTTON1))
 	{
-		value = GetLeftFlexSensorValue();
-		LogAt(2, "flex value : %d", value);
-		DelayMilliSeconds(100);
+		value = GetIndexFlexValue();
+		PrintAt(2, "flex value : %d", value);
+		DelayMillis(100);
 	}
-	SetLeftDefaultFlexSensorValue(value);
-	LogAt(2, "FlexLeftDefault : %d", GetLeftDefaultFlexSensorValue());
-	DelayMilliSeconds(1000);
+	SetIndexFlexDefaultValue(value);
+	PrintAt(2, "FlexLeftDefault : %d", GetIndexFlexDefaultValue());
+	DelayMillis(1000);
 	value = 0;
 
 	// Left Fold Threshold
-	LogAt(3, "Are you fold your second finger?");
-	while (!IsButton1Clicking())
+	PrintAt(3, "Are you fold your second finger?");
+	while (!IsButtonClicking(BUTTON1))
 	{
-		value = GetLeftFlexSensorValue();
-		LogAt(4, "flex value : %d", value);
-		DelayMilliSeconds(100);
+		value = GetIndexFlexValue();
+		PrintAt(4, "flex value : %d", value);
+		DelayMillis(100);
 	}
-	SetLeftClickThreshold(value);
-	LogAt(4, "FlexLeftThreshold : %d", GetLeftClickThreshold());
-	DelayMilliSeconds(1000);
+	SetIndexFoldThreshold(value);
+	PrintAt(4, "FlexLeftThreshold : %d", GetIndexFoldThreshold());
+	DelayMillis(1000);
 	value = 0;
 
 	// Right Default Value
-	LogAt(1, "Are you stretch your third finger");
-	while (!IsButton1Clicking())
+	PrintAt(1, "Are you stretch your third finger");
+	while (!IsButtonClicking(BUTTON1))
 	{
-		value = GetRightFlexSensorValue();
-		LogAt(2, "flex value : %d", value);
-		DelayMilliSeconds(100);
+		value = GetMiddleFlexValue();
+		PrintAt(2, "flex value : %d", value);
+		DelayMillis(100);
 	}
-	SetRightDefaultFlexSensorValue(value);
-	LogAt(2, "FlexRightDefault : %d", GetRightDefaultFlexSensorValue());
-	DelayMilliSeconds(1000);
+	SetMiddleFlexDefaultValue(value);
+	PrintAt(2, "FlexRightDefault : %d", GetMiddleFlexDefaultValue());
+	DelayMillis(1000);
 	value = 0;
 
 	// Right Fold Threshold
-	LogAt(3, "Are you fold your third finger?");
-	while (!IsButton1Clicking())
+	PrintAt(3, "Are you fold your third finger?");
+	while (!IsButtonClicking(BUTTON1))
 	{
-		value = GetRightFlexSensorValue();
-		LogAt(4, "flex value : %d", value);
-		DelayMilliSeconds(100);
+		value = GetMiddleFlexValue();
+		PrintAt(4, "flex value : %d", value);
+		DelayMillis(100);
 	}
-	SetRightClickThreshold(value);
-	LogAt(4, "FlexRightThreshold : %d", GetRightClickThreshold());
-	DelayMilliSeconds(1000);
+	SetMiddleFoldThreshold(value);
+	PrintAt(4, "FlexRightThreshold : %d", GetMiddleFoldThreshold());
+	DelayMillis(1000);
 	value = 0;
 
 }
 
-uint32_t GetLeftFlexSensorValue(void)
+void HandleFlexSensor(void)
 {
-	return FlexSensorBuffer[0];
+	// Fold index finger
+	if (!m_index_folding && IsIndexFoldEvent())
+	{
+		PressLeftMouse();
+		m_index_folding = true;
+	}
+	// Streek index finger
+	if (m_index_folding && IsIndexStreekEvent())
+	{
+		ReleaseLeftMouse();
+		m_index_folding = false;
+	}
+
+	// Fold middle finger
+	if (!m_middle_folding && IsMiddleFoldEvent())
+	{
+		PressRightMouse();
+		m_middle_folding = true;
+	}
+	// Streek middle finger
+	if (m_middle_folding && IsMiddleStreekEvent())
+	{
+		ReleaseRightMouse();
+		m_middle_folding = false;
+	}
 }
 
-uint32_t GetRightFlexSensorValue(void)
+void PressLeftMouse(void)
 {
-	return FlexSensorBuffer[1];
+	Print("PressLeft at %d", GetCurrentTimeMillis());
+	BluetoothWriteString("p l\r\n");
 }
 
-boolean IsLeftClickStart(void)
+void ReleaseLeftMouse(void)
 {
-	return GetLeftFlexSensorValue() != 0
-			&& GetLeftFlexSensorValue() <= GetLeftClickThreshold();
+	Print("ReleaseLeft at %d", GetCurrentTimeMillis());
+	BluetoothWriteString("r l\r\n");
 }
 
-boolean IsLeftClickEnd(void)
+void PressRightMouse(void)
 {
-	return GetLeftFlexSensorValue() != 0
-			&& GetLeftFlexSensorValue()
-					>= (GetLeftDefaultFlexSensorValue() * 0.9);
+	Print("PressRight at %d", GetCurrentTimeMillis());
+	BluetoothWriteString("p r\r\n");
 }
 
-boolean IsRightClickStart(void)
+void ReleaseRightMouse(void)
 {
-	return GetRightFlexSensorValue() != 0
-			&& GetRightFlexSensorValue() <= GetRightClickThreshold();
+	Print("ReleaseRight at %d", GetCurrentTimeMillis());
+	BluetoothWriteString("r r\r\n");
 }
 
-boolean IsRightClickEnd(void)
+boolean IsIndexFoldEvent(void)
 {
-	return GetRightFlexSensorValue() != 0
-			&& GetRightFlexSensorValue()
-					>= (GetRightDefaultFlexSensorValue() * 0.9);
+	uint32_t indexFlexValue = GetIndexFlexValue();
+	return indexFlexValue != 0 && (indexFlexValue <= GetIndexFoldThreshold());
 }
 
-uint32_t GetLeftClickThreshold(void)
+boolean IsIndexStreekEvent(void)
 {
-	return FlexClickThreshold[0];
+	uint32_t indexFlexValue = GetIndexFlexValue();
+	return indexFlexValue != 0
+			&& (indexFlexValue >= (GetIndexFlexDefaultValue() * 0.9));
 }
 
-void SetLeftClickThreshold(uint32_t value)
+boolean IsMiddleFoldEvent(void)
 {
-	FlexClickThreshold[0] = value;
+	uint32_t middleFlexValue = GetMiddleFlexValue();
+	return middleFlexValue != 0 && (middleFlexValue <= GetMiddleFoldThreshold());
 }
 
-uint32_t GetLeftDefaultFlexSensorValue(void)
+boolean IsMiddleStreekEvent(void)
 {
-	return FlexDefaultValue[0];
+	uint32_t middleFlexValue = GetMiddleFlexValue();
+	return middleFlexValue != 0
+			&& (middleFlexValue >= (GetMiddleFlexDefaultValue() * 0.9));
 }
 
-void SetLeftDefaultFlexSensorValue(uint32_t value)
+uint32_t GetIndexFlexValue(void)
 {
-	FlexDefaultValue[0] = value;
+	return FlexSensorValue[0];
 }
 
-uint32_t GetRightClickThreshold(void)
+uint32_t GetIndexFlexDefaultValue(void)
 {
-	return FlexClickThreshold[1];
+	return FlexSensorDefaultValue[0];
 }
 
-void SetRightClickThreshold(uint32_t value)
+void SetIndexFlexDefaultValue(uint32_t value)
 {
-	FlexClickThreshold[1] = value;
+	FlexSensorDefaultValue[0] = value;
 }
 
-uint32_t GetRightDefaultFlexSensorValue(void)
+uint32_t GetIndexFoldThreshold(void)
 {
-	return FlexDefaultValue[1];
+	return FlexSensorFoldThreshold[0];
 }
 
-void SetRightDefaultFlexSensorValue(uint32_t value)
+void SetIndexFoldThreshold(uint32_t value)
 {
-	FlexDefaultValue[1] = value;
+	FlexSensorFoldThreshold[0] = value;
+}
+
+uint32_t GetMiddleFlexValue(void)
+{
+	return FlexSensorValue[1];
+}
+
+uint32_t GetMiddleFlexDefaultValue(void)
+{
+	return FlexSensorDefaultValue[1];
+}
+
+void SetMiddleFlexDefaultValue(uint32_t value)
+{
+	FlexSensorDefaultValue[1] = value;
+}
+
+uint32_t GetMiddleFoldThreshold(void)
+{
+	return FlexSensorFoldThreshold[1];
+}
+
+void SetMiddleFoldThreshold(uint32_t value)
+{
+	FlexSensorFoldThreshold[1] = value;
 }
