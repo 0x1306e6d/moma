@@ -1,15 +1,12 @@
-# MotionMouse
+# moma
 
----
+The motion mouse project with STM32F107xx and some sensors.
 
-부산대학교 정보컴퓨터공학부 3-2 월요일 분반 텀
-stm32, cortex-m3를 이용한 MotionMouse 만들기 파일입니다.
+We used FB755AC bluetooth embedded module for bluetooth communication, TSS10264 flex sensor and HC_SR04 ultrasonic ranging module for range measurement.
 
-**최종발표일** : 2016-12-23
+## Authors
 
-**조원** :
-
-* 201424406 권 은 
-* 201224534 정민석 
-* 201424411 김기환 
-* 201124407 구진현
+ * 구진현 (201124407)
+ * 정민석 (201224534)
+ * 권은 (201424406)
+ * 김기환 (201424411)
